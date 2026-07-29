@@ -35,6 +35,7 @@ def _ensure_config_exists() -> None:
 
 
 def read_config() -> dict:
+    import os
     _ensure_config_exists()
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}
@@ -48,6 +49,19 @@ def read_config() -> dict:
             "winner": {"template_mode": "image", "excel_path": "", "columns": {}, "image_text_fields": {}},
             "school": {"template_mode": "image", "excel_path": "", "columns": {}, "image_text_fields": {}},
         }
+
+    # Fallback to Environment Variables if set (for cloud deployments like Render)
+    if "email" not in cfg:
+        cfg["email"] = {}
+    
+    env_email = os.environ.get("SENDER_EMAIL") or os.environ.get("GMAIL_EMAIL")
+    env_pass = os.environ.get("SENDER_APP_PASSWORD") or os.environ.get("GMAIL_APP_PASSWORD")
+
+    if env_email and not cfg["email"].get("sender_email"):
+        cfg["email"]["sender_email"] = env_email
+    if env_pass and not cfg["email"].get("sender_app_password"):
+        cfg["email"]["sender_app_password"] = env_pass
+
     return cfg
 
 

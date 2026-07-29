@@ -227,6 +227,17 @@ export default function DataTab() {
         setSavedEmail(s.sender_email)
         setAuthSaved(true)
         setSenderEmail(s.sender_email)
+      } else {
+        // Auto-restore from browser localStorage if backend restarted
+        const localEmail = localStorage.getItem('cert_sender_email')
+        const localPass = localStorage.getItem('cert_app_password')
+        if (localEmail && localPass) {
+          setEmailAuth(localEmail, localPass).then(() => {
+            setSavedEmail(localEmail)
+            setSenderEmail(localEmail)
+            setAuthSaved(true)
+          }).catch(() => {/* ignore stale local creds */})
+        }
       }
     }).catch(() => {/* ignore */})
 
@@ -633,9 +644,14 @@ export default function DataTab() {
   const handleSaveAuth = async () => {
     setAuthSaving(true); setAuthError(''); setAuthSaved(false)
     try {
-      await setEmailAuth(senderEmail.trim(), appPassword.trim())
+      const emailToSave = senderEmail.trim()
+      const passToSave = appPassword.trim()
+      await setEmailAuth(emailToSave, passToSave)
+      // Save in browser localStorage so server restarts don't log user out
+      localStorage.setItem('cert_sender_email', emailToSave)
+      localStorage.setItem('cert_app_password', passToSave)
       setAuthSaved(true)
-      setSavedEmail(senderEmail.trim())
+      setSavedEmail(emailToSave)
       setAppPassword('')
     } catch (e: any) {
       setAuthError(e.message)
@@ -648,6 +664,8 @@ export default function DataTab() {
     setSigningOut(true)
     try {
       await signOutEmailAuth()
+      localStorage.removeItem('cert_sender_email')
+      localStorage.removeItem('cert_app_password')
       setAuthSaved(false)
       setSavedEmail(null)
       setSenderEmail('')
