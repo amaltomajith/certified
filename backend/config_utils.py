@@ -34,6 +34,46 @@ def _ensure_config_exists() -> None:
                 yaml.dump(default_cfg, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
 
+def _merge_defaults(cfg: dict) -> dict:
+    """If user config has empty template paths or text fields, fall back to config.default.yaml."""
+    if not DEFAULT_CONFIG_PATH.exists():
+        return cfg
+    try:
+        with open(DEFAULT_CONFIG_PATH, "r", encoding="utf-8") as f:
+            d_cfg = yaml.safe_load(f) or {}
+    except Exception:
+        return cfg
+
+    # Ensure types exist
+    types = cfg.get("types", {})
+    d_types = d_cfg.get("types", {})
+
+    for cert_type, d_type_cfg in d_types.items():
+        if cert_type not in types:
+            types[cert_type] = d_type_cfg
+            continue
+        type_cfg = types[cert_type]
+        
+        # Fallback template path
+        if not type_cfg.get("image_template_path") and d_type_cfg.get("image_template_path"):
+            type_cfg["image_template_path"] = d_type_cfg["image_template_path"]
+        
+        for k in ("image_template_path_1st", "image_template_path_2nd", "image_template_path_3rd"):
+            if not type_cfg.get(k) and d_type_cfg.get(k):
+                type_cfg[k] = d_type_cfg[k]
+
+        # Fallback text fields if empty
+        if not type_cfg.get("image_text_fields") and d_type_cfg.get("image_text_fields"):
+            type_cfg["image_text_fields"] = d_type_cfg["image_text_fields"]
+
+        for k in ("image_text_fields_1st", "image_text_fields_2nd", "image_text_fields_3rd"):
+            if not type_cfg.get(k) and d_type_cfg.get(k):
+                type_cfg[k] = d_type_cfg[k]
+
+    cfg["types"] = types
+    return cfg
+
+
 def read_config() -> dict:
     import os
     _ensure_config_exists()
@@ -49,6 +89,9 @@ def read_config() -> dict:
             "winner": {"template_mode": "image", "excel_path": "", "columns": {}, "image_text_fields": {}},
             "school": {"template_mode": "image", "excel_path": "", "columns": {}, "image_text_fields": {}},
         }
+
+    # Fallback to defaults for missing template paths or fields
+    cfg = _merge_defaults(cfg)
 
     # Fallback to Environment Variables if set (for cloud deployments like Render)
     if "email" not in cfg:
