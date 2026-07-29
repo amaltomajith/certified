@@ -964,22 +964,38 @@ async def send_endpoint(body: SendRequest):
             sent, failed = 0, 0
             results = []
 
-            def _send_one(msg_obj):
-                """Open a fresh SMTP connection, send one email, close.
-                Uses SMTP_SSL (port 465) for reliability — Gmail's STARTTLS
-                on 587 is unreliable on some networks."""
-                port = int(ecfg.get("smtp_port", 465))
-                host = ecfg["smtp_host"]
+            def _create_smtp_connection(host: str, port: int):
+                # Force IPv4 to prevent [Errno 101] Network is unreachable on cloud environments (like Render)
+                target_ip = host
+                try:
+                    import socket
+                    addrs = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+                    if addrs:
+                        target_ip = addrs[0][4][0]
+                except Exception as exc:
+                    logger.warning(f"IPv4 resolution for {host} failed: {exc}")
 
                 if port == 465:
-                    # Implicit TLS — most reliable for Gmail
-                    srv = smtplib.SMTP_SSL(host, port, timeout=smtp_timeout, context=ssl_context)
+                    return smtplib.SMTP_SSL(target_ip, port, timeout=smtp_timeout, context=ssl_context, server_hostname=host)
                 else:
-                    # Port 587 or other — use STARTTLS
-                    srv = smtplib.SMTP(host, port, timeout=smtp_timeout)
+                    srv = smtplib.SMTP(target_ip, port, timeout=smtp_timeout)
                     srv.ehlo()
                     srv.starttls(context=ssl_context)
                     srv.ehlo()
+                    return srv
+
+            def _send_one(msg_obj):
+                """Open a fresh SMTP connection with IPv4 resolution & fallback, send one email, close."""
+                port = int(ecfg.get("smtp_port", 465))
+                host = ecfg["smtp_host"]
+
+                srv = None
+                try:
+                    srv = _create_smtp_connection(host, port)
+                except Exception as first_err:
+                    alt_port = 587 if port == 465 else 465
+                    logger.warning(f"SMTP connection to {host}:{port} failed ({first_err}). Retrying with port {alt_port}...")
+                    srv = _create_smtp_connection(host, alt_port)
 
                 try:
                     srv.login(ecfg["sender_email"], password)
