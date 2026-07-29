@@ -1,0 +1,147 @@
+active_type: participation
+types:
+  participation:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: ''
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      student_name: ''
+      school: ''
+      event_name: ''
+      poc_email: ''
+      poc_name: ''
+    image_text_fields:
+      student_name:
+        x: 1200
+        y: 800
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+      event_name:
+        x: 1200
+        y: 1000
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+      school:
+        x: 1200
+        y: 1200
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+  winner:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: ''
+    image_template_path_1st: ''
+    image_template_path_2nd: ''
+    image_template_path_3rd: ''
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      student_name: ''
+      school: ''
+      event_name: ''
+      poc_email: ''
+      poc_name: ''
+      position: ''
+    image_text_fields:
+      student_name:
+        x: 1200
+        y: 800
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+      event_name:
+        x: 1200
+        y: 1000
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+      school:
+        x: 1200
+        y: 1200
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 600
+  school:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: ''
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      school: ''
+      poc_email: ''
+    image_text_fields:
+      school:
+        x: 1200
+        y: 800
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: true
+        width: 1000
+  volunteer:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: ''
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      volunteer_name: ''
+      volunteer_email: ''
+    image_text_fields:
+      volunteer_name:
+        x: 1200
+        y: 800
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: true
+        width: 1000
+output_dir: output
+email:
+  dry_run: false
+  sender_email: ''
+  sender_app_password: ''
+  sender_name: ''
+  smtp_host: smtp.gmail.com
+  smtp_port: 465
+  subject_template: ''
+  body_template: ''
+  drive_root_folder_id: ''
