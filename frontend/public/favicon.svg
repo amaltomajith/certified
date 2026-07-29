@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Certificate shape -->
+  <rect x="10" y="14" width="44" height="34" rx="4" fill="white" fill-opacity="0.15" stroke="white" stroke-opacity="0.6" stroke-width="1.5"/>
+  <!-- Horizontal lines simulating text -->
+  <rect x="18" y="22" width="28" height="2.5" rx="1.25" fill="white" fill-opacity="0.9"/>
+  <rect x="20" y="28" width="24" height="2" rx="1" fill="white" fill-opacity="0.6"/>
+  <rect x="22" y="33" width="20" height="2" rx="1" fill="white" fill-opacity="0.6"/>
+  <!-- Medal/seal at bottom -->
+  <circle cx="32" cy="50" r="7" fill="url(#medal)"/>
+  <defs>
+    <linearGradient id="medal" x1="25" y1="43" x2="39" y2="57" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="50" r="5" fill="none" stroke="#fef3c7" stroke-width="1.5"/>
+  <text x="32" y="54" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="bold">✓</text>
+</svg>
