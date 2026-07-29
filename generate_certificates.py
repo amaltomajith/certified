@@ -247,38 +247,42 @@ def generate_docx_mode(df, cfg):
     return pd.DataFrame(manifest_rows)
 
 
-# ---------------- IMAGE MODE ----------------
+from pathlib import Path
 
 def draw_text_field(draw, img, field_cfg, text):
-    font = ImageFont.truetype(field_cfg["font_path"], field_cfg["font_size"])
+    raw_font_path = field_cfg.get("font_path", "sample_data/DejaVuSans.ttf")
+    font_file = Path(raw_font_path)
+    if not font_file.is_absolute():
+        font_file = Path(__file__).parent / raw_font_path
+    if not font_file.exists():
+        font_file = Path(__file__).parent / "sample_data" / "DejaVuSans.ttf"
+
+    font_size = int(field_cfg.get("font_size", 24))
+    font = ImageFont.truetype(str(font_file), font_size)
     text_str = str(text)
-    
+
     x = field_cfg["x"]
     y = field_cfg["y"]
     width = field_cfg.get("width", 0) or 0
     align = field_cfg.get("align", "center")
+    color = field_cfg.get("color", "#000000")
 
     if width > 0:
         # Bounding Box (Line) mode:
-        # Text sits ABOVE the drawn baseline at Y, centered horizontally between X and X+Width.
-        # Uses Middle Baseline anchor ('ms') with a small 5% of font-size gap to align perfectly with the UI's translate(0, -85%).
+        # Text is centered between X and X+Width, sitting on the baseline at Y.
         center_x = x + (width / 2)
-        gap_px = int(field_cfg["font_size"] * 0.05)
-        draw.text((center_x, y - gap_px), text_str, font=font, fill=field_cfg.get("color", "#000000"), anchor='ms')
+        draw.text((center_x, y), text_str, font=font, fill=color, anchor='ms')
     else:
-        # Point mode (legacy drag and drop): align relative to the exact X coordinate
-        bbox = draw.textbbox((0, 0), text_str, font=font, anchor='lt')
-        text_w = bbox[2] - bbox[0]
-        text_h = bbox[3] - bbox[1]
+        # Point mode: align relative to exact (x, y) using Pillow native anchors
+        # Matches CSS transform: translate(-50%/-100%/0%, -50%) exactly across Linux & Windows
+        anchor_map = {
+            "center": "mm",
+            "right": "rm",
+            "left": "lm"
+        }
+        anchor = anchor_map.get(align, "mm")
+        draw.text((x, y), text_str, font=font, fill=color, anchor=anchor)
 
-        if align == "center":
-            x = x - (text_w / 2)
-        elif align == "right":
-            x = x - text_w
-            
-        # Shift up by half the text height so the vertical centre lands on y
-        y = y - (text_h / 2)
-        draw.text((x, y), text_str, font=font, fill=field_cfg.get("color", "#000000"), anchor='lt')
 
 
 def load_base_image(template_path, dpi=300):
