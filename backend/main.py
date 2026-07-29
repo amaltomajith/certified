@@ -413,57 +413,54 @@ def debug_raw_config():
 
 @app.get("/debug/cert-render")
 def debug_cert_render():
-    """
-    Generate a DEBUG certificate image using the EXACT same code path as production,
-    but with coloured cross-hair markers at each text field's (x,y) anchor point.
-    Returns base64 PNG so it can be compared visually to the coordinate editor preview.
-    """
-    cfg = read_config()
-    at = cfg.get("active_type", "participation")
-    active_cfg = get_active_cfg(cfg)
+    try:
+        cfg = read_config()
+        at = cfg.get("active_type", "participation")
+        active_cfg = get_active_cfg(cfg)
 
-    template_path = active_cfg.get("image_template_path", "")
-    if not template_path or not os.path.exists(template_path):
-        raise HTTPException(404, "Template not found — upload a template first.")
+        template_path = active_cfg.get("image_template_path", "")
+        if not template_path or not os.path.exists(template_path):
+            raise HTTPException(404, "Template not found — upload a template first.")
 
-    raw_fields = active_cfg.get("image_text_fields", {})
-    if not raw_fields:
-        raise HTTPException(400, "No image_text_fields saved in config — set positions first.")
+        raw_fields = active_cfg.get("image_text_fields", {})
+        if not raw_fields:
+            raise HTTPException(400, "No image_text_fields saved in config — set positions first.")
 
-    dpi = active_cfg.get("image_render_dpi", 300)
-    img = load_base_image(template_path, dpi=dpi)
-    draw = __import__("PIL.ImageDraw", fromlist=["ImageDraw"]).Draw(img)
-    w, h = img.size
+        dpi = active_cfg.get("image_render_dpi", 300)
+        img = load_base_image(template_path, dpi=dpi)
+        draw = __import__("PIL.ImageDraw", fromlist=["ImageDraw"]).Draw(img)
+        w, h = img.size
 
-    DEBUG_SAMPLE = {
-        "student_name": "Test Student",
-        "event_name": "Test Event 2026",
-        "school": "Test School",
-        "volunteer_name": "Test Volunteer",
-    }
+        DEBUG_SAMPLE = {
+            "student_name": "Test Student",
+            "event_name": "Test Event 2026",
+            "school": "Test School",
+            "volunteer_name": "Test Volunteer",
+        }
 
-    for field_name, field_cfg in raw_fields.items():
-        sample_text = DEBUG_SAMPLE.get(field_name, field_name.replace("_", " ").title())
-        # Draw the actual text using the same draw_text_field function as production
-        draw_text_field(draw, img, field_cfg, sample_text)
+        for field_name, field_cfg in raw_fields.items():
+            sample_text = DEBUG_SAMPLE.get(field_name, field_name.replace("_", " ").title())
+            draw_text_field(draw, img, field_cfg, sample_text)
 
-        # Draw a bright marker at the (x, y) anchor point
-        fx, fy = int(field_cfg["x"]), int(field_cfg["y"])
-        r = max(12, int(w * 0.005))  # marker radius scales with image size
-        draw.ellipse([fx-r, fy-r, fx+r, fy+r], fill=(255, 0, 0), outline=(255, 255, 0))
-        draw.line([(fx-r*2, fy), (fx+r*2, fy)], fill=(255, 255, 0), width=max(2, r//3))
-        draw.line([(fx, fy-r*2), (fx, fy+r*2)], fill=(255, 255, 0), width=max(2, r//3))
+            fx, fy = int(field_cfg.get("x", 0)), int(field_cfg.get("y", 0))
+            r = max(12, int(w * 0.005))
+            draw.ellipse([fx-r, fy-r, fx+r, fy+r], fill=(255, 0, 0), outline=(255, 255, 0))
+            draw.line([(fx-r*2, fy), (fx+r*2, fy)], fill=(255, 255, 0), width=max(2, r//3))
+            draw.line([(fx, fy-r*2), (fx, fy+r*2)], fill=(255, 255, 0), width=max(2, r//3))
 
-    # Downscale for web if very large
-    max_w = 1400
-    if w > max_w:
-        ratio = max_w / w
-        img = img.resize((max_w, int(h * ratio)), resample=__import__("PIL.Image", fromlist=["Image"]).LANCZOS)
+        max_w = 1400
+        if w > max_w:
+            ratio = max_w / w
+            img = img.resize((max_w, int(h * ratio)), resample=__import__("PIL.Image", fromlist=["Image"]).LANCZOS)
 
-    buf = __import__("io").BytesIO()
-    img.save(buf, format="PNG")
-    b64 = __import__("base64").b64encode(buf.getvalue()).decode()
-    return {"image": f"data:image/png;base64,{b64}", "width": w, "height": h, "field_names": list(raw_fields.keys())}
+        buf = __import__("io").BytesIO()
+        img.save(buf, format="PNG")
+        b64 = __import__("base64").b64encode(buf.getvalue()).decode()
+        return {"image": f"data:image/png;base64,{b64}", "width": w, "height": h, "field_names": list(raw_fields.keys())}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(500, detail=f"Debug render error: {exc}")
 
 
 # ---------- Coordinates Preview (image mode) ----------
