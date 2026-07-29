@@ -356,7 +356,7 @@ def generate_image_mode(df, cfg):
 
         fname_base = safe_filename(row.get('student_name', row.get('volunteer_name', row.get('school', 'cert'))))
         pdf_out = os.path.join(pdf_dir, fname_base + ".pdf")
-        img.save(pdf_out, "PDF", resolution=150.0)
+        img.save(pdf_out, "PDF", resolution=float(render_dpi))
 
         manifest_rows.append({
             "student_name": row.get("student_name", ""),
