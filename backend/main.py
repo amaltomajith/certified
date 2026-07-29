@@ -12,6 +12,7 @@ import asyncio
 import base64
 import io
 import json
+import logging
 import os
 import smtplib
 import ssl
@@ -19,6 +20,9 @@ import sys
 import threading
 from pathlib import Path
 from typing import Dict, Optional
+
+logger = logging.getLogger("cert_automation")
+
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile
