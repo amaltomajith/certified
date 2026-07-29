@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 # Root directory of project
 ROOT = Path(__file__).resolve().parent.parent
 
-DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+DRIVE_SCOPES = [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/gmail.send',
+]
 
 # OAuth2 token storage (persisted between runs)
 OAUTH_TOKEN_FILE = ROOT / ".drive_oauth_token.json"
@@ -68,6 +71,45 @@ def get_oauth_drive_service():
         OAUTH_TOKEN_FILE.write_text(json.dumps(updated), encoding="utf-8")
 
     return build("drive", "v3", credentials=creds)
+
+
+def get_oauth_credentials():
+    """Return a refreshed google.oauth2.credentials.Credentials object from the saved token."""
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+
+    token_data = json.loads(OAUTH_TOKEN_FILE.read_text(encoding="utf-8"))
+    creds = Credentials(
+        token=token_data.get("token"),
+        refresh_token=token_data.get("refresh_token"),
+        token_uri=token_data.get("token_uri"),
+        client_id=token_data.get("client_id"),
+        client_secret=token_data.get("client_secret"),
+        scopes=token_data.get("scopes"),
+    )
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        updated = json.loads(OAUTH_TOKEN_FILE.read_text(encoding="utf-8"))
+        updated["token"] = creds.token
+        OAUTH_TOKEN_FILE.write_text(json.dumps(updated), encoding="utf-8")
+    return creds
+
+
+def send_via_gmail_api(mime_message) -> None:
+    """
+    Send an email via Gmail REST API (HTTPS/443) — works on cloud hosts like Render
+    where outbound SMTP ports (465/587) may be blocked or timed out.
+    mime_message: email.message.EmailMessage or email.mime.multipart.MIMEMultipart object.
+    """
+    import base64
+    from googleapiclient.discovery import build
+
+    creds = get_oauth_credentials()
+    service = build("gmail", "v1", credentials=creds)
+
+    raw = base64.urlsafe_b64encode(mime_message.as_bytes()).decode("utf-8")
+    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    logger.info("[Gmail API] Email sent successfully via Gmail REST API.")
 
 
 def get_oauth_user_email() -> Optional[str]:

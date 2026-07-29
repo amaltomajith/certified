@@ -988,17 +988,38 @@ async def send_endpoint(body: SendRequest):
                     srv.ehlo()
                     return srv
 
+            # Check if Gmail API is available (OAuth token has gmail.send scope)
+            def _gmail_api_available() -> bool:
+                try:
+                    from drive_service import is_oauth_drive_available, OAUTH_TOKEN_FILE
+                    import json
+                    if not is_oauth_drive_available():
+                        return False
+                    data = json.loads(OAUTH_TOKEN_FILE.read_text(encoding="utf-8"))
+                    scopes = data.get("scopes", [])
+                    return any("gmail" in s for s in scopes)
+                except Exception:
+                    return False
+
+            _use_gmail_api = _gmail_api_available()
+
             def _send_one(msg_obj):
-                """Open a fresh SMTP connection with IPv4 resolution & fallback, send one email, close."""
+                """Send one email. Tries Gmail REST API first (HTTPS, always works on cloud);
+                falls back to direct SMTP if Gmail API not authorized."""
+                if _use_gmail_api:
+                    from drive_service import send_via_gmail_api
+                    send_via_gmail_api(msg_obj)
+                    return
+
+                # SMTP fallback
                 port = int(ecfg.get("smtp_port", 465))
                 host = ecfg["smtp_host"]
-
                 srv = None
                 try:
                     srv = _create_smtp_connection(host, port)
                 except Exception as first_err:
                     alt_port = 587 if port == 465 else 465
-                    logger.warning(f"SMTP connection to {host}:{port} failed ({first_err}). Retrying with port {alt_port}...")
+                    logger.warning(f"SMTP {host}:{port} failed ({first_err}). Retrying port {alt_port}...")
                     srv = _create_smtp_connection(host, alt_port)
 
                 try:
