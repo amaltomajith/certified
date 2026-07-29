@@ -3,7 +3,8 @@
  * All calls go to /api/* which Vite proxies to http://localhost:8000/*
  */
 
-const BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+export const BASE = API_BASE ? API_BASE.replace(/\/$/, '') : '/api';
 
 export type StudentDetail = {
   name: string;

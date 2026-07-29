@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut, Info } from 'lucide-react'
 import {
+  BASE,
   uploadExcel, uploadTemplate, clearExcel,
   getColumns, saveColumns,
   getActiveType, setActiveType,
@@ -262,7 +263,7 @@ export default function DataTab() {
   // and auto-loads the preview if the config already has an image template.
   useEffect(() => {
     // Fetch template mode from a lightweight config read
-    fetch('/api/config/template')
+    fetch(`${BASE}/config/template`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return
@@ -1345,7 +1346,7 @@ export default function DataTab() {
                     className="btn btn-ghost btn-sm"
                     onClick={async () => {
                       if (!confirm("Reset all field positions to defaults?")) return;
-                      await fetch('/api/config/reset-text-fields', { method: 'POST' }).catch(() => {});
+                      await fetch(`${BASE}/config/reset-text-fields`, { method: 'POST' }).catch(() => {});
                       window.location.reload();
                     }}
                     style={{ marginLeft: 'auto', border: '1px solid #dc2626', color: '#dc2626' }}
