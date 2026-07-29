@@ -807,7 +807,7 @@ def delete_drive_credentials():
 
 @app.post("/config/drive-auth/oauth-upload")
 async def upload_oauth_client_secrets(file: UploadFile = File(...)):
-    """Upload the OAuth2 client_secrets.json (Desktop App type) from Google Cloud Console."""
+    """Upload the OAuth2 client_secrets.json (Web Application type) from Google Cloud Console."""
     if not file.filename.endswith(".json"):
         raise HTTPException(status_code=400, detail="Must be a .json file.")
     contents = await file.read()
@@ -822,20 +822,63 @@ async def upload_oauth_client_secrets(file: UploadFile = File(...)):
     return {"status": "uploaded"}
 
 
-@app.post("/config/drive-auth/oauth-start")
-def oauth_start(reset: bool = False):
-    """Start the OAuth2 authorization flow (opens the user's browser)."""
-    from drive_service import is_oauth_client_available, start_oauth_flow_in_background, get_oauth_flow_status, reset_oauth_flow_state
+@app.get("/config/drive-auth/oauth-url")
+def get_oauth_url(redirect_uri: str):
+    """
+    Generate the Google OAuth2 authorization URL for the web redirect flow.
+    The frontend opens this URL in a new tab; Google redirects back to redirect_uri.
+    """
+    from drive_service import is_oauth_client_available, get_oauth_authorization_url
     if not is_oauth_client_available():
-        raise HTTPException(status_code=400, detail="OAuth2 client_secrets.json not uploaded yet.")
-    status = get_oauth_flow_status()
-    if status["status"] == "in_progress" and not reset:
-        return {"status": "in_progress", "message": "Auth flow already in progress — check your browser."}
-    if reset:
-        reset_oauth_flow_state()
-    start_oauth_flow_in_background(force=True)
-    return {"status": "started", "message": "Browser should open automatically. Complete sign-in there."}
+        raise HTTPException(status_code=400, detail="oauth_client_secrets.json not uploaded yet.")
+    try:
+        auth_url, state = get_oauth_authorization_url(redirect_uri)
+        return {"url": auth_url, "state": state}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
+
+@app.get("/config/drive-auth/oauth-callback")
+def oauth_callback(code: str, state: str):
+    """
+    Google redirects here after the user grants (or denies) Drive access.
+    Exchanges the code for tokens, saves them, and returns a self-closing HTML page.
+    """
+    from drive_service import complete_oauth_from_callback
+    from fastapi.responses import HTMLResponse
+
+    success_html = """<!DOCTYPE html>
+<html>
+<head><title>Google Drive Connected</title></head>
+<body style="font-family:sans-serif;text-align:center;padding:60px;background:#f0fdf4;">
+  <div style="max-width:400px;margin:auto;background:#fff;border-radius:12px;padding:40px;box-shadow:0 4px 24px #0001;">
+    <div style="font-size:48px;margin-bottom:16px;">✅</div>
+    <h2 style="color:#15803d;margin:0 0 12px">Google Drive Connected!</h2>
+    <p style="color:#166534;margin:0 0 20px">Authorization successful. This tab will close in 3 seconds.</p>
+    <p style="color:#94a3b8;font-size:12px">Return to the Certificate Automation app.</p>
+  </div>
+  <script>setTimeout(() => window.close(), 3000);</script>
+</body>
+</html>"""
+
+    error_html = """<!DOCTYPE html>
+<html>
+<head><title>Authorization Failed</title></head>
+<body style="font-family:sans-serif;text-align:center;padding:60px;background:#fff1f2;">
+  <div style="max-width:400px;margin:auto;background:#fff;border-radius:12px;padding:40px;box-shadow:0 4px 24px #0001;">
+    <div style="font-size:48px;margin-bottom:16px;">❌</div>
+    <h2 style="color:#be123c;margin:0 0 12px">Authorization Failed</h2>
+    <p style="color:#9f1239;margin:0 0 8px">{error}</p>
+    <p style="color:#94a3b8;font-size:12px">Close this tab and try again in the app.</p>
+  </div>
+</body>
+</html>"""
+
+    try:
+        complete_oauth_from_callback(code=code, state=state)
+        return HTMLResponse(success_html)
+    except Exception as exc:
+        return HTMLResponse(error_html.format(error=str(exc)), status_code=400)
 
 
 @app.get("/config/drive-auth/oauth-status")
@@ -856,8 +899,6 @@ def oauth_revoke():
     from drive_service import revoke_oauth_token
     revoke_oauth_token()
     return {"status": "revoked"}
-
-
 
 
 # ---------- Send (SSE) ----------

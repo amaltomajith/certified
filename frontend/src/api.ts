@@ -276,9 +276,8 @@ export async function uploadOAuthClientSecrets(file: File): Promise<void> {
   }
 }
 
-export async function startOAuthFlow(reset = false): Promise<{ status: string; message: string }> {
-  const url = `${BASE}/config/drive-auth/oauth-start${reset ? '?reset=true' : ''}`;
-  const res = await fetch(url, { method: 'POST' });
+export async function getOAuthUrl(redirectUri: string): Promise<{ url: string; state: string }> {
+  const res = await fetch(`${BASE}/config/drive-auth/oauth-url?redirect_uri=${encodeURIComponent(redirectUri)}`);
   return handleJSON(res);
 }
 

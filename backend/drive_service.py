@@ -89,103 +89,107 @@ def reset_oauth_flow_state() -> None:
     with _oauth_flow_lock:
         _oauth_flow_state["status"] = "idle"
         _oauth_flow_state["error"] = None
+        _oauth_flow_state.pop("state", None)
+        _oauth_flow_state.pop("redirect_uri", None)
 
 
-def start_oauth_flow_in_background(force: bool = True) -> None:
-    """Start the OAuth2 InstalledAppFlow in a background thread (opens browser)."""
+def get_oauth_authorization_url(redirect_uri: str) -> tuple:
+    """
+    Generate a Google OAuth2 authorization URL for the web redirect flow.
+    Works in cloud deployments — no local browser needed.
+    Returns (auth_url, state).
+    """
+    try:
+        from google_auth_oauthlib.flow import Flow
+    except ImportError:
+        raise RuntimeError("google_auth_oauthlib is not installed.")
+
+    if not OAUTH_CLIENT_SECRETS_FILE.exists():
+        raise FileNotFoundError("oauth_client_secrets.json not found. Upload it first.")
+
+    flow = Flow.from_client_secrets_file(
+        str(OAUTH_CLIENT_SECRETS_FILE),
+        scopes=DRIVE_SCOPES,
+        redirect_uri=redirect_uri,
+    )
+    auth_url, state = flow.authorization_url(
+        access_type="offline",
+        prompt="consent",          # ensures refresh_token is always returned
+        include_granted_scopes="true",
+    )
+
     with _oauth_flow_lock:
-        if not force and _oauth_flow_state.get("status") == "in_progress":
-            return
         _oauth_flow_state["status"] = "in_progress"
         _oauth_flow_state["error"] = None
+        _oauth_flow_state["state"] = state
+        _oauth_flow_state["redirect_uri"] = redirect_uri
 
-    def _run():
-        import sys
-        print("[OAuth2] Starting Google Drive authorization flow in background thread...", flush=True)
-        try:
-            try:
-                from google_auth_oauthlib.flow import InstalledAppFlow, WSGITimeoutError
-            except ImportError as err:
-                with _oauth_flow_lock:
-                    _oauth_flow_state["status"] = "error"
-                    _oauth_flow_state["error"] = "google_auth_oauthlib module not installed in Python environment."
-                print(f"[OAuth2 ERROR] google_auth_oauthlib missing: {err}", file=sys.stderr, flush=True)
-                return
+    logger.info(f"[OAuth2] Authorization URL generated. redirect_uri={redirect_uri}")
+    return auth_url, state
 
-            import requests
 
-            if not OAUTH_CLIENT_SECRETS_FILE.exists():
-                with _oauth_flow_lock:
-                    _oauth_flow_state["status"] = "error"
-                    _oauth_flow_state["error"] = "oauth_client_secrets.json file missing. Upload it first."
-                print("[OAuth2 ERROR] oauth_client_secrets.json not found.", file=sys.stderr, flush=True)
-                return
+def complete_oauth_from_callback(code: str, state: str) -> None:
+    """
+    Exchange the authorization code for tokens after Google redirects back.
+    Called by the /config/drive-auth/oauth-callback endpoint.
+    """
+    import requests as req_lib
+    try:
+        from google_auth_oauthlib.flow import Flow
+    except ImportError:
+        raise RuntimeError("google_auth_oauthlib is not installed.")
 
-            print(f"[OAuth2] Reading credentials from {OAUTH_CLIENT_SECRETS_FILE.name}...", flush=True)
-            flow = InstalledAppFlow.from_client_secrets_file(
-                str(OAUTH_CLIENT_SECRETS_FILE),
-                scopes=DRIVE_SCOPES,
-            )
+    with _oauth_flow_lock:
+        stored_state = _oauth_flow_state.get("state")
+        redirect_uri = _oauth_flow_state.get("redirect_uri")
 
-            print("[OAuth2] Launching local HTTP receiver (port=0, timeout=300s) and opening browser...", flush=True)
-            try:
-                creds = flow.run_local_server(
-                    host="localhost",
-                    port=0,
-                    open_browser=True,
-                    timeout_seconds=300,
-                    authorization_prompt_message="[OAuth2] Please visit this URL to authorize Google Drive: {url}",
-                    success_message="Google Drive authorization complete! You may close this browser window and return to the dashboard."
-                )
-            except WSGITimeoutError:
-                with _oauth_flow_lock:
-                    _oauth_flow_state["status"] = "error"
-                    _oauth_flow_state["error"] = "Authorization timed out (5 minute limit). Please click Authorize with Google again."
-                print("[OAuth2 TIMEOUT] User did not complete login within 5 minutes.", file=sys.stderr, flush=True)
-                return
+    if stored_state != state:
+        with _oauth_flow_lock:
+            _oauth_flow_state["status"] = "error"
+            _oauth_flow_state["error"] = "OAuth state mismatch — possible CSRF. Please try again."
+        raise ValueError("OAuth state mismatch")
 
-            print("[OAuth2] Authorization code received! Fetching user account info...", flush=True)
-            user_email = None
-            try:
-                resp = requests.get(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    headers={"Authorization": f"Bearer {creds.token}"},
-                    timeout=10
-                )
-                if resp.ok:
-                    user_email = resp.json().get("email")
-            except Exception as e:
-                print(f"[OAuth2 WARN] Failed to fetch user profile info: {e}", flush=True)
+    if not redirect_uri:
+        raise ValueError("No active OAuth flow found. Please start the flow again.")
 
-            token_data = {
-                "token": creds.token,
-                "refresh_token": creds.refresh_token,
-                "token_uri": creds.token_uri,
-                "client_id": creds.client_id,
-                "client_secret": creds.client_secret,
-                "scopes": list(creds.scopes),
-                "user_email": user_email,
-            }
-            OAUTH_TOKEN_FILE.write_text(json.dumps(token_data, indent=2), encoding="utf-8")
-            
-            with _oauth_flow_lock:
-                _oauth_flow_state["status"] = "done"
-                _oauth_flow_state["error"] = None
-            
-            logger.info(f"OAuth2 Drive authorization completed successfully for user: {user_email}")
-            print(f"[OAuth2 SUCCESS] Token saved to {OAUTH_TOKEN_FILE.name}. Authorized user: {user_email}", flush=True)
+    flow = Flow.from_client_secrets_file(
+        str(OAUTH_CLIENT_SECRETS_FILE),
+        scopes=DRIVE_SCOPES,
+        state=state,
+        redirect_uri=redirect_uri,
+    )
+    flow.fetch_token(code=code)
+    creds = flow.credentials
 
-        except Exception as exc:
-            import traceback
-            tb_str = traceback.format_exc()
-            with _oauth_flow_lock:
-                _oauth_flow_state["status"] = "error"
-                _oauth_flow_state["error"] = f"{type(exc).__name__}: {exc}"
-            logger.error(f"OAuth2 Drive authorization failed: {exc}\n{tb_str}")
-            print(f"[OAuth2 ERROR] Exception occurred:\n{tb_str}", file=sys.stderr, flush=True)
+    # Fetch the authorized account email
+    user_email = None
+    try:
+        resp = req_lib.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {creds.token}"},
+            timeout=10,
+        )
+        if resp.ok:
+            user_email = resp.json().get("email")
+    except Exception as e:
+        logger.warning(f"[OAuth2] Could not fetch user profile: {e}")
 
-    t = threading.Thread(target=_run, daemon=True)
-    t.start()
+    token_data = {
+        "token": creds.token,
+        "refresh_token": creds.refresh_token,
+        "token_uri": creds.token_uri,
+        "client_id": creds.client_id,
+        "client_secret": creds.client_secret,
+        "scopes": list(creds.scopes),
+        "user_email": user_email,
+    }
+    OAUTH_TOKEN_FILE.write_text(json.dumps(token_data, indent=2), encoding="utf-8")
+
+    with _oauth_flow_lock:
+        _oauth_flow_state["status"] = "done"
+        _oauth_flow_state["error"] = None
+
+    logger.info(f"[OAuth2] Drive authorization completed for user: {user_email}")
 
 
 def get_oauth_flow_status() -> dict:

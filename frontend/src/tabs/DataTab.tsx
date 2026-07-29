@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut, Info } from 'lucide-react'
+import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut } from 'lucide-react'
 import {
   BASE,
   uploadExcel, uploadTemplate, clearExcel,
@@ -8,9 +8,16 @@ import {
   getCoordinatesPreview, getTextFields, saveTextFields,
   getEmailAuthStatus, setEmailAuth, signOutEmailAuth,
   getDriveAuthStatus, uploadDriveCredentials, deleteDriveCredentials, saveDriveRootFolder,
-  uploadOAuthClientSecrets, startOAuthFlow, getOAuthFlowStatus, revokeOAuthToken,
+  uploadOAuthClientSecrets, getOAuthUrl, getOAuthFlowStatus, revokeOAuthToken,
   type ExcelUploadResult, type ColumnMapping, type PocGroup,
 } from '../api'
+
+/** Derive the raw backend base URL (without trailing slash) for OAuth redirect URIs. */
+const getBackendUrl = (): string => {
+  const apiBase = import.meta.env.VITE_API_BASE_URL
+  if (apiBase) return apiBase.replace(/\/$/, '')
+  return 'http://localhost:8000'
+}
 
 
 const CERT_TYPES = [
@@ -711,9 +718,13 @@ export default function DataTab() {
     setOauthFlowStatus('in_progress')
     setOauthFlowError('')
     try {
-      await startOAuthFlow(true)
-      // Poll for completion
+      // Build the redirect URI — this is the backend /oauth-callback endpoint
+      const redirectUri = `${getBackendUrl()}/config/drive-auth/oauth-callback`
+      const { url } = await getOAuthUrl(redirectUri)
+      // Open Google's consent page in a new tab (works in cloud deployments)
+      window.open(url, '_blank', 'noopener,noreferrer')
 
+      // Poll the backend until the callback completes the flow
       const poll = setInterval(async () => {
         try {
           const s = await getOAuthFlowStatus()
@@ -760,9 +771,55 @@ export default function DataTab() {
 
   // ── Render ─────────────────────────────────────────────────────────────
 
+  // ── Setup Wizard state ─────────────────────────────────────────────────
+  const [wizardDismissed, setWizardDismissed] = useState(() => localStorage.getItem('wizard_dismissed') === '1')
+  const wizardSteps = [
+    { label: 'Upload roster Excel', done: !!excelResult, hint: 'Roster Data section below' },
+    { label: 'Map Excel columns', done: colSaved, hint: 'Column Mapping section below' },
+    { label: 'Upload certificate template', done: !!(templatePath || templatePath1st), hint: 'Certificate Template section below' },
+    { label: 'Set up Gmail (SMTP)', done: !!savedEmail, hint: 'Email Credentials section below' },
+    { label: 'Google Drive (optional)', done: oauthDriveAvailable || driveAvailable, hint: 'Google Drive section below', optional: true },
+  ]
+  const requiredDone = wizardSteps.filter(s => !s.optional).every(s => s.done)
+
   return (
 
     <div>
+      {/* ── Setup Wizard ── */}
+      {!wizardDismissed && (
+        <div className="card" style={{ marginBottom: 24, borderColor: requiredDone ? '#10b981' : '#6366f1', borderLeft: '4px solid ' + (requiredDone ? '#10b981' : '#6366f1'), background: requiredDone ? '#f0fdf4' : undefined }}>
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: requiredDone ? '#dcfce7' : undefined, color: requiredDone ? '#15803d' : undefined }}>
+            <span>{requiredDone ? '🎉 All set! Ready to generate & send certificates.' : '🚀 Setup Checklist — complete these steps to get started'}</span>
+            <button
+              onClick={() => { setWizardDismissed(true); localStorage.setItem('wizard_dismissed', '1') }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1 }}
+              title="Dismiss"
+            >✕</button>
+          </div>
+          <div className="card-body" style={{ padding: '12px 20px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {wizardSteps.map((s, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+                  background: s.done ? '#dcfce7' : s.optional ? '#f8fafc' : '#eff6ff',
+                  color: s.done ? '#15803d' : s.optional ? '#94a3b8' : '#1e40af',
+                  border: '1px solid ' + (s.done ? '#86efac' : s.optional ? '#e2e8f0' : '#bfdbfe'),
+                }}>
+                  <span style={{ fontSize: 16 }}>{s.done ? '✅' : s.optional ? '⭕' : '⏳'}</span>
+                  <span>{i + 1}. {s.label}{s.optional ? ' (optional)' : ''}</span>
+                </div>
+              ))}
+            </div>
+            {!requiredDone && (
+              <div style={{ marginTop: 10, fontSize: 12, color: '#64748b' }}>
+                Complete all required steps above, then go to the <strong>Generate &amp; Send</strong> tab.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Certificate Type Selector ── */}
       <div className="card" style={{ marginBottom: 24, borderColor: '#3b82f6', borderLeft: '4px solid #3b82f6' }}>
         <div className="card-header" style={{ backgroundColor: '#eff6ff', color: '#1e40af' }}>📝 Step 1: Select Certificate Type</div>
@@ -1391,26 +1448,35 @@ export default function DataTab() {
             </div>
           ) : (
             <>
-              <div className="alert alert-info" style={{ marginBottom: 16 }}>
-                <Info size={18} />
-                <span>
-                  Enter your Gmail credentials once — they'll be saved for future sessions.
-                  {' '}<a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer"
-                     style={{ color: 'var(--primary)', fontWeight: 500 }}>
-                    Need an App Password? ↗
+              {/* Requirements notice */}
+              <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 8, padding: '12px 16px', marginBottom: 16, fontSize: 13 }}>
+                <div style={{ fontWeight: 700, color: '#92400e', marginBottom: 6 }}>⚠️ Gmail App Password Requirements</div>
+                <ul style={{ margin: 0, paddingLeft: 18, color: '#78350f', lineHeight: 1.8 }}>
+                  <li>Must be a <strong>personal @gmail.com account</strong> (not a school or Workspace account)</li>
+                  <li><strong>2-Step Verification</strong> must be enabled on your Google Account</li>
+                  <li>App Passwords are created at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" style={{ color: '#0284c7', fontWeight: 600 }}>myaccount.google.com/apppasswords ↗</a></li>
+                </ul>
+                <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <a href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noreferrer"
+                    style={{ fontSize: 12, background: '#fff', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 12px', color: '#92400e', textDecoration: 'none', fontWeight: 600 }}>
+                    Enable 2-Step Verification ↗
                   </a>
-                </span>
+                  <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer"
+                    style={{ fontSize: 12, background: '#fff', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 12px', color: '#92400e', textDecoration: 'none', fontWeight: 600 }}>
+                    Create App Password ↗
+                  </a>
+                </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Gmail address</label>
+                  <label>Gmail address <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 11 }}>(@gmail.com only)</span></label>
                   <input
                     type="email" placeholder="you@gmail.com"
                     value={senderEmail} onChange={e => setSenderEmail(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label>App Password <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(16 chars, spaces OK)</span></label>
+                  <label>App Password <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(16 chars from App Passwords page)</span></label>
                   <input
                     type="password" placeholder="xxxx xxxx xxxx xxxx"
                     value={appPassword} onChange={e => setAppPassword(e.target.value)}
@@ -1474,16 +1540,23 @@ export default function DataTab() {
                   </button>
                 </div>
               </div>
-            ) : oauthFlowStatus === 'in_progress' ? (
-              <div style={{ backgroundColor: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
-                ⏳ <strong>Waiting for authorization…</strong> A browser window should have opened. Sign in with Google and grant access.
-              </div>
             ) : (
               <div>
-                {!oauthClientAvailable ? (
+    {!oauthClientAvailable ? (
                   <div>
-                    <div style={{ fontSize: 13, color: '#475569', marginBottom: 10, lineHeight: 1.5 }}>
-                      <strong>Step 1:</strong> In <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" style={{ color: '#0284c7', fontWeight: 600 }}>Google Cloud Console → Credentials ↗</a>, click <strong>+ Create Credentials → OAuth 2.0 Client ID → Desktop app</strong>. Download the <code>client_secrets.json</code>.
+                    {/* Step-by-step guide for first-time setup */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px', marginBottom: 12, fontSize: 13, lineHeight: 1.7 }}>
+                      <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>📋 One-time setup (3 steps):</div>
+                      <ol style={{ margin: 0, paddingLeft: 20, color: '#334155' }}>
+                        <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" style={{ color: '#0284c7', fontWeight: 600 }}>Google Cloud Console → Credentials ↗</a></li>
+                        <li>Click <strong>+ Create Credentials → OAuth 2.0 Client ID → Web application</strong></li>
+                        <li>Under <strong>Authorized redirect URIs</strong>, add exactly:<br />
+                          <code style={{ background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: 4, fontSize: 12, userSelect: 'all', display: 'inline-block', marginTop: 4 }}>
+                            {getBackendUrl()}/config/drive-auth/oauth-callback
+                          </code>
+                        </li>
+                        <li>Download the <code>client_secret_...json</code> file and upload it below</li>
+                      </ol>
                     </div>
                     <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, fontSize: 13 }}>
                       {oauthUploading ? 'Uploading…' : '📄 Upload client_secrets.json'}
@@ -1502,24 +1575,13 @@ export default function DataTab() {
                     </label>
                   </div>
                 )}
+                {oauthFlowStatus === 'in_progress' && (
+                  <div style={{ marginTop: 10, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '12px 16px', fontSize: 13, color: '#1e40af' }}>
+                    ⏳ <strong>Waiting for you to authorize in the new tab…</strong> Sign in with Google and grant Drive access, then return here.
+                  </div>
+                )}
                 {oauthFlowStatus === 'error' && (
-                  oauthFlowError.includes('google_auth_oauthlib') || oauthFlowError.includes('restart') ? (
-                    <div style={{ marginTop: 10, backgroundColor: '#fef9c3', border: '1.5px solid #fbbf24', borderRadius: 8, padding: '14px 16px', fontSize: 13 }}>
-                      <div style={{ fontWeight: 700, color: '#92400e', marginBottom: 8 }}>⚠️ Backend server needs to be restarted</div>
-                      <div style={{ color: '#78350f', lineHeight: 1.7, marginBottom: 10 }}>
-                        The Python backend loaded old code. You need to restart <strong>uvicorn</strong> (the backend — NOT the npm/Vite frontend).
-                      </div>
-                      <div style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', borderRadius: 6, padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, color: '#1c1917', marginBottom: 10 }}>
-                        <div style={{ color: '#92400e', marginBottom: 4, fontFamily: 'sans-serif', fontWeight: 600, fontSize: 11 }}>In the terminal where you ran uvicorn — press Ctrl+C, then:</div>
-                        uvicorn backend.main:app --reload
-                      </div>
-                      <div style={{ color: '#78350f', fontSize: 12 }}>
-                        Once you see <em>"Application startup complete"</em> in that terminal, come back here and click <strong>🔗 Authorize with Google</strong> again.
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="alert alert-danger" style={{ marginTop: 10, fontSize: 13 }}>❌ {oauthFlowError}</div>
-                  )
+                  <div className="alert alert-danger" style={{ marginTop: 10, fontSize: 13 }}>❌ {oauthFlowError}</div>
                 )}
               </div>
             )}
