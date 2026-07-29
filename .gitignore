@@ -7,8 +7,7 @@ __pycache__/
 venv/
 env/
 
-# Config with credentials — never commit these
-config.yaml
+# Credentials — never commit these
 .auth_credentials
 .drive_oauth_token.json
 oauth_client_secrets.json

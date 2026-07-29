@@ -1,0 +1,238 @@
+﻿active_type: winner
+types:
+  participation:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: sample_data/participants.jpg
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      student_name: ''
+      school: ''
+      event_name: ''
+      poc_email: ''
+      poc_name: ''
+    image_text_fields:
+      student_name:
+        x: 2199
+        y: 1316
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 506
+      event_name:
+        x: 1508
+        y: 1477
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 792
+      school:
+        x: 1582
+        y: 1804
+        color: '#000000'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 72
+        is_bold: false
+        width: 849
+  winner:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: sample_data/1st.png
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      student_name: ''
+      school: ''
+      event_name: ''
+      poc_email: ''
+      poc_name: ''
+      position: ''
+    image_template_path_1st: sample_data/1st.png
+    image_template_path_2nd: sample_data/2nd.png
+    image_template_path_3rd: sample_data/3rd.png
+    image_text_fields:
+      student_name:
+        x: 1265
+        y: 863
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 716
+      event_name:
+        x: 1281
+        y: 1152
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 684
+      school:
+        x: 1265
+        y: 1011
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 773
+    image_text_fields_1st:
+      student_name:
+        x: 1265
+        y: 863
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 716
+      event_name:
+        x: 1281
+        y: 1152
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 684
+      school:
+        x: 1265
+        y: 1011
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 773
+    image_text_fields_2nd:
+      student_name:
+        x: 1284
+        y: 863
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 716
+      event_name:
+        x: 1301
+        y: 1152
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 684
+      school:
+        x: 1251
+        y: 1008
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 773
+    image_text_fields_3rd:
+      student_name:
+        x: 1251
+        y: 864
+        color: '#000000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 716
+      event_name:
+        x: 1306
+        y: 1152
+        color: '#ff0000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 684
+      school:
+        x: 1264
+        y: 1011
+        color: '#ff0000'
+        align: center
+        font_path: sample_data/DancingScript-Regular.ttf
+        font_family: "'Dancing Script', cursive"
+        font_size: 75
+        is_bold: true
+        width: 773
+  school:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: sample_data/our students.jpg
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      school: ''
+      poc_email: ''
+    image_text_fields:
+      school:
+        x: 1907
+        y: 1342
+        color: '#13314B'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 75
+        is_bold: true
+        width: 1347
+  volunteer:
+    template_mode: image
+    docx_template_path: ''
+    image_template_path: ''
+    image_render_dpi: 300
+    excel_path: ''
+    excel_sheet_name: 0
+    columns:
+      volunteer_name: ''
+      volunteer_email: ''
+    image_text_fields:
+      volunteer_name:
+        x: 1200
+        y: 800
+        color: '#13314B'
+        align: center
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 75
+        is_bold: true
+        width: 1000
+output_dir: output
+email:
+  dry_run: false
+  sender_email: ''
+  sender_app_password: ''
+  sender_name: Event Certification Team
+  smtp_host: smtp.gmail.com
+  smtp_port: 465
+  drive_root_folder_id: ''
