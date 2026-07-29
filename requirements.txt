@@ -1,19 +1,15 @@
-# pip install -r requirements.txt
+fastapi>=0.100
+uvicorn[standard]>=0.23
+python-multipart>=0.0.6
+aiofiles>=23.0
 pandas
 openpyxl
 xlrd
 python-docx
 docxtpl
 Pillow
-PyMuPDF          # PDF rasterisation for image-mode templates (fitz)
+PyMuPDF
 PyYAML
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-
-# Also required, installed separately (not via pip):
-# LibreOffice (`soffice` command) - needed only for template_mode: "docx"
-#   Ubuntu/Debian: sudo apt install libreoffice
-#   Mac:           brew install --cask libreoffice
-#   Windows:       download from libreoffice.org
-

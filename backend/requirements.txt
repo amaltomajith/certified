@@ -2,3 +2,14 @@ fastapi>=0.100
 uvicorn[standard]>=0.23
 python-multipart>=0.0.6
 aiofiles>=23.0
+pandas
+openpyxl
+xlrd
+python-docx
+docxtpl
+Pillow
+PyMuPDF
+PyYAML
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
