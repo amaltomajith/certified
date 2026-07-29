@@ -66,7 +66,7 @@ app = FastAPI(title="Certificate Automation API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -153,6 +153,11 @@ def set_active_type(body: ActiveType):
     cfg["active_type"] = body.active_type
     write_config(cfg)
     return {"active_type": body.active_type}
+
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Certificate Automation API is running"}
 
 
 @app.get("/health")
