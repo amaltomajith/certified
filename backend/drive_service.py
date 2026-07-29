@@ -123,6 +123,7 @@ def get_oauth_authorization_url(redirect_uri: str) -> tuple:
         _oauth_flow_state["error"] = None
         _oauth_flow_state["state"] = state
         _oauth_flow_state["redirect_uri"] = redirect_uri
+        _oauth_flow_state["code_verifier"] = getattr(flow, "code_verifier", None)
 
     logger.info(f"[OAuth2] Authorization URL generated. redirect_uri={redirect_uri}")
     return auth_url, state
@@ -142,6 +143,7 @@ def complete_oauth_from_callback(code: str, state: str) -> None:
     with _oauth_flow_lock:
         stored_state = _oauth_flow_state.get("state")
         redirect_uri = _oauth_flow_state.get("redirect_uri")
+        code_verifier = _oauth_flow_state.get("code_verifier")
 
     if stored_state != state:
         with _oauth_flow_lock:
@@ -158,6 +160,9 @@ def complete_oauth_from_callback(code: str, state: str) -> None:
         state=state,
         redirect_uri=redirect_uri,
     )
+    if code_verifier:
+        flow.code_verifier = code_verifier
+
     flow.fetch_token(code=code)
     creds = flow.credentials
 
