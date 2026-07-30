@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut } from 'lucide-react'
+import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut, Trash2 } from 'lucide-react'
 import {
   BASE,
-  uploadExcel, uploadTemplate, clearExcel,
+  uploadExcel, uploadTemplate, clearTemplate, clearExcel,
   getColumns, saveColumns,
   getActiveType, setActiveType,
   getCoordinatesPreview, getTextFields, saveTextFields,
@@ -374,6 +374,7 @@ export default function DataTab() {
 
   const handleTemplateFile = useCallback(async (file: File, winnerPosition?: '1st' | '2nd' | '3rd') => {
     setTemplateLoading(true); setTemplateError('')
+    setGridImage('') // Reset cached preview image immediately
     try {
       const res = await uploadTemplate(file, winnerPosition)
       if (winnerPosition === '1st') setTemplatePath1st(res.path)
@@ -390,7 +391,6 @@ export default function DataTab() {
       setTemplateMode(mode)
       // ── Auto-load preview immediately when an image template is uploaded ──
       if (mode === 'image') {
-        // Small delay so the backend has finished writing the file
         await new Promise(r => setTimeout(r, 300))
         await handleGridPreview(winnerPosition)
       }
@@ -400,6 +400,29 @@ export default function DataTab() {
       setTemplateLoading(false)
     }
   }, [handleGridPreview])
+
+  const handleClearTemplate = useCallback(async (winnerPosition?: '1st' | '2nd' | '3rd') => {
+    setTemplateLoading(true); setTemplateError('')
+    try {
+      await clearTemplate(winnerPosition)
+      if (winnerPosition === '1st') setTemplatePath1st('')
+      else if (winnerPosition === '2nd') setTemplatePath2nd('')
+      else if (winnerPosition === '3rd') setTemplatePath3rd('')
+      
+      if (!winnerPosition || activeCertType !== 'winner') {
+        setTemplatePath('')
+        setTemplatePath1st('')
+        setTemplatePath2nd('')
+        setTemplatePath3rd('')
+      }
+      setGridImage('')
+      setPreviewError('')
+    } catch (e: any) {
+      setTemplateError(e.message)
+    } finally {
+      setTemplateLoading(false)
+    }
+  }, [activeCertType])
 
   const handleSaveColumns = async () => {
     setColSaving(true); setColSaved(false)
@@ -963,7 +986,7 @@ export default function DataTab() {
           {activeCertType === 'winner' && templateMode === 'image' ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 12 }}>
               {/* 1st Place */}
-              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12 }}>
+              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12, position: 'relative' }}>
                 <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>🥇 1st Place Certificate</div>
                 <input
                   type="file"
@@ -971,14 +994,24 @@ export default function DataTab() {
                   style={{ fontSize: 12, width: '100%' }}
                 />
                 {templatePath1st && (
-                  <div style={{ fontSize: 11, color: '#16a34a', marginTop: 6, wordBreak: 'break-all' }}>
-                    ✔ {templatePath1st.split('/').pop()}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: '#16a34a', wordBreak: 'break-all' }}>
+                      ✔ {templatePath1st.split('/').pop()}
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      style={{ color: '#ef4444', padding: '2px 6px', fontSize: 11 }}
+                      onClick={() => handleClearTemplate('1st')}
+                      title="Remove 1st place design"
+                    >
+                      <Trash2 size={12} /> Remove
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* 2nd Place */}
-              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12 }}>
+              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12, position: 'relative' }}>
                 <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>🥈 2nd Place Certificate</div>
                 <input
                   type="file"
@@ -986,14 +1019,24 @@ export default function DataTab() {
                   style={{ fontSize: 12, width: '100%' }}
                 />
                 {templatePath2nd && (
-                  <div style={{ fontSize: 11, color: '#16a34a', marginTop: 6, wordBreak: 'break-all' }}>
-                    ✔ {templatePath2nd.split('/').pop()}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: '#16a34a', wordBreak: 'break-all' }}>
+                      ✔ {templatePath2nd.split('/').pop()}
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      style={{ color: '#ef4444', padding: '2px 6px', fontSize: 11 }}
+                      onClick={() => handleClearTemplate('2nd')}
+                      title="Remove 2nd place design"
+                    >
+                      <Trash2 size={12} /> Remove
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* 3rd Place */}
-              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12 }}>
+              <div style={{ border: '1px dashed #ccc', borderRadius: 6, padding: 12, position: 'relative' }}>
                 <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>🥉 3rd Place Certificate</div>
                 <input
                   type="file"
@@ -1001,17 +1044,38 @@ export default function DataTab() {
                   style={{ fontSize: 12, width: '100%' }}
                 />
                 {templatePath3rd && (
-                  <div style={{ fontSize: 11, color: '#16a34a', marginTop: 6, wordBreak: 'break-all' }}>
-                    ✔ {templatePath3rd.split('/').pop()}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: '#16a34a', wordBreak: 'break-all' }}>
+                      ✔ {templatePath3rd.split('/').pop()}
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      style={{ color: '#ef4444', padding: '2px 6px', fontSize: 11 }}
+                      onClick={() => handleClearTemplate('3rd')}
+                      title="Remove 3rd place design"
+                    >
+                      <Trash2 size={12} /> Remove
+                    </button>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <input
-              type="file"
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleTemplateFile(f) }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input
+                type="file"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleTemplateFile(f) }}
+              />
+              {templatePath && (
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: '#ef4444', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                  onClick={() => handleClearTemplate()}
+                >
+                  <Trash2 size={14} /> Remove Design
+                </button>
+              )}
+            </div>
           )}
 
           {templateLoading && (
@@ -1021,11 +1085,20 @@ export default function DataTab() {
           )}
 
           {templatePath && !templateLoading && activeCertType !== 'winner' && (
-            <div className="alert alert-success mt-2">
-              <CheckCircle2 size={18} /> {templatePath.split('/').pop()}
-              {templateMode === 'image' && gridImage && (
-                <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.8 }}>— Preview auto-loaded ↓</span>
-              )}
+            <div className="alert alert-success mt-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <CheckCircle2 size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {templatePath.split('/').pop()}
+                {templateMode === 'image' && gridImage && (
+                  <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.8 }}>— Preview auto-loaded ↓</span>
+                )}
+              </div>
+              <button
+                className="btn btn-ghost btn-xs"
+                style={{ color: '#ef4444', fontSize: 12 }}
+                onClick={() => handleClearTemplate()}
+              >
+                <Trash2 size={14} /> Remove Design
+              </button>
             </div>
           )}
 

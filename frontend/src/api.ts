@@ -148,6 +148,13 @@ export async function uploadTemplate(
   return handleJSON(res);
 }
 
+export async function clearTemplate(winnerPosition?: '1st' | '2nd' | '3rd'): Promise<{ status: string }> {
+  let url = `${BASE}/upload/template`;
+  if (winnerPosition) url += `?winner_position=${winnerPosition}`;
+  const res = await fetch(url, { method: 'DELETE' });
+  return handleJSON(res);
+}
+
 export async function getColumns(): Promise<{
   columns: ColumnMapping;
   excel_path: string;

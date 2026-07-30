@@ -253,12 +253,17 @@ async def upload_template(file: UploadFile = File(...), winner_position: Optiona
     else:
         raise HTTPException(400, "Accepted formats: .docx, .pdf, .png, .jpg")
 
-    dest = ROOT / "sample_data" / file.filename
+    import time, re
+    fname_only, ext = os.path.splitext(file.filename or "template")
+    safe_stem = re.sub(r"[^A-Za-z0-9_\-]+", "_", fname_only).strip("_") or "template"
+    unique_filename = f"{safe_stem}_{int(time.time())}{ext}"
+
+    dest = ROOT / "sample_data" / unique_filename
     dest.parent.mkdir(exist_ok=True)
     with open(dest, "wb") as f:
         f.write(await file.read())
 
-    rel_path = f"sample_data/{file.filename}"
+    rel_path = f"sample_data/{unique_filename}"
     cfg = read_config()
     at = cfg.get("active_type", "participation")
     active_cfg = cfg.get("types", {}).get(at, {})
@@ -277,6 +282,33 @@ async def upload_template(file: UploadFile = File(...), winner_position: Optiona
     write_config(cfg)
 
     return {"template_mode": mode, "path": rel_path}
+
+
+@app.delete("/upload/template")
+def clear_template(winner_position: Optional[str] = None):
+    """Clear uploaded template paths from active config."""
+    cfg = read_config()
+    at = cfg.get("active_type", "participation")
+    active_cfg = cfg.get("types", {}).get(at, {})
+    
+    if at == "winner" and winner_position in ("1st", "2nd", "3rd"):
+        active_cfg[f"image_template_path_{winner_position}"] = ""
+        p1 = active_cfg.get("image_template_path_1st", "")
+        p2 = active_cfg.get("image_template_path_2nd", "")
+        p3 = active_cfg.get("image_template_path_3rd", "")
+        if not p1 and not p2 and not p3:
+            active_cfg["image_template_path"] = ""
+    else:
+        active_cfg["image_template_path"] = ""
+        active_cfg["docx_template_path"] = ""
+        if at == "winner":
+            active_cfg["image_template_path_1st"] = ""
+            active_cfg["image_template_path_2nd"] = ""
+            active_cfg["image_template_path_3rd"] = ""
+
+    cfg["types"][at] = active_cfg
+    write_config(cfg)
+    return {"status": "cleared"}
 
 
 # ---------- Column Mapping ----------
