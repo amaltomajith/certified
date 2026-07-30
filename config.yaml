@@ -1,4 +1,4 @@
-﻿active_type: winner
+active_type: winner
 types:
   participation:
     template_mode: image
@@ -44,6 +44,25 @@ types:
         font_size: 72
         is_bold: false
         width: 849
+    email:
+      subject_template: "ANVESHA '26 | Participation Certificates & Contingent Summary - {school}"
+      body_template: |
+        Dear {poc_name},
+
+        Greetings from the ANVESHA Organizing Team.
+
+        We are writing to extend our sincere gratitude to you for coordinating and managing your student contingent for ANVESHA '26, held at CHRIST (Deemed to be University), Kengeri Campus. The dedication, talent, and sportsmanship displayed by your students added immense value to the competitive spirit and overall success of the fest.
+
+        To acknowledge their efforts, please find their participation certificates neatly structured by event in the Google Drive directory linked below, along with the attached Excel sheet containing their respective names and events.
+
+        {student_list}
+
+        Kindly review the shared details and let us know if any student or certificate has been left out or requires any correction. We request you to distribute these certificates to the respective students at your earliest convenience.
+
+        Thank you once again for your cooperation and vital support. We look forward to welcoming your institution back to our campus for future editions of the fest.
+
+        With warm thanks and gratitude,
+        The ANVESHA '26 Organizing Team
   winner:
     template_mode: image
     docx_template_path: ''

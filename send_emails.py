@@ -305,7 +305,7 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     try:
         subject = ecfg["subject_template"].format_map(fmt_vars_text)
     except Exception:
-        subject = f"Certificate for {poc_name or poc_email}"
+        subject = f"ANVESHA '26 | Participation Certificates & Contingent Summary - {school_val}"
 
     raw_body_tmpl = ecfg.get("body_template", "")
     if not is_direct and "{student_list}" not in raw_body_tmpl:
@@ -335,12 +335,30 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     except Exception:
         body_html_content = f"Dear <strong>{poc_name or poc_email}</strong>,<br><br>Please find your certificate attached."
 
+    # Locate Thank You graphic if present
+    ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlbodymail", "Anvesha Participant Appreciation.jpg.jpeg")
+    if not os.path.exists(ty_img_path):
+        ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", "Anvesha Participant Appreciation.jpg.jpeg")
+    has_ty_img = os.path.exists(ty_img_path)
+
+    thank_you_banner_html = (
+        '<div style="text-align: center; margin: 28px 0 24px 0;">'
+        '<img src="cid:thank_you_banner" alt="Thank You - ANVESHA \'26" '
+        'style="width: 100%; max-width: 590px; height: auto; border-radius: 10px; '
+        'box-shadow: 0 4px 14px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; display: block; margin: 0 auto;" />'
+        '</div>'
+    ) if has_ty_img else ""
+
     # Format the paragraphs for clean HTML
     paragraphs = [p.strip() for p in body_html_content.split("\n\n") if p.strip()]
     formatted_paragraphs = []
+    ty_inserted = False
     for p in paragraphs:
         if html_student_list and html_student_list in p:
             formatted_paragraphs.append(drive_card_html + p)
+            if thank_you_banner_html:
+                formatted_paragraphs.append(thank_you_banner_html)
+                ty_inserted = True
         else:
             p_clean = p.replace("\n", "<br>")
             p_clean = p_clean.replace("ANVESHA '26", "<strong>ANVESHA '26</strong>")
@@ -350,6 +368,12 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
 
     if drive_card_html and not any(drive_card_html in fp for fp in formatted_paragraphs):
         formatted_paragraphs.insert(0, drive_card_html)
+
+    if thank_you_banner_html and not ty_inserted:
+        if len(formatted_paragraphs) > 1:
+            formatted_paragraphs.insert(-1, thank_you_banner_html)
+        else:
+            formatted_paragraphs.append(thank_you_banner_html)
 
     html_body_paragraphs = "".join(formatted_paragraphs)
 
@@ -447,6 +471,37 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
                 subtype="png",
                 cid="christ_header",
                 filename="christ_header.png"
+            )
+
+    # Add inline Thank You appreciation image if present
+    if has_ty_img:
+        with open(ty_img_path, "rb") as f:
+            ty_data = f.read()
+        html_part = None
+        for part in msg.iter_parts():
+            if part.get_content_type() == "multipart/alternative":
+                for subpart in part.iter_parts():
+                    if subpart.get_content_type() == "text/html":
+                        html_part = subpart
+                        break
+            elif part.get_content_type() == "text/html":
+                html_part = part
+                break
+        
+        if html_part:
+            html_part.add_related(
+                ty_data,
+                maintype="image",
+                subtype="jpeg",
+                cid="thank_you_banner"
+            )
+        else:
+            msg.add_attachment(
+                ty_data,
+                maintype="image",
+                subtype="jpeg",
+                cid="thank_you_banner",
+                filename="thank_you_banner.jpeg"
             )
 
     if is_direct:

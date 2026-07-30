@@ -1207,6 +1207,12 @@ async def send_endpoint(body: SendRequest):
                         if header_src.exists():
                             shutil.copy2(header_src, fallback_dir / "christ_header.png")
 
+                        ty_src = ROOT / "htmlbodymail" / "Anvesha Participant Appreciation.jpg.jpeg"
+                        if not ty_src.exists():
+                            ty_src = ROOT / "sample_data" / "Anvesha Participant Appreciation.jpg.jpeg"
+                        if ty_src.exists():
+                            shutil.copy2(ty_src, fallback_dir / "thank_you_banner.jpeg")
+
                         # Save student_list.xlsx in fallback folder
                         try:
                             excel_bytes = generate_excel_bytes(student_names, pdf_paths, group, active_type=at)
@@ -1237,18 +1243,28 @@ async def send_endpoint(body: SendRequest):
                         html_part = msg.get_body(preferencelist=("html",))
                         if html_part:
                             html_content = html_part.get_content()
-                            # Convert header image to Base64 data URL so it renders properly when copy-pasted to email clients
-                            header_src = ROOT / "sample_data" / "christ_header.png"
+                            import base64
+                            # Convert header image to Base64 data URL
                             if header_src.exists():
-                                import base64
                                 try:
                                     b64_data = base64.b64encode(header_src.read_bytes()).decode("utf-8")
-                                    html_for_copy = html_content.replace("cid:christ_header", f"data:image/png;base64,{b64_data}")
+                                    html_content = html_content.replace("cid:christ_header", f"data:image/png;base64,{b64_data}")
                                 except Exception:
-                                    html_for_copy = html_content.replace("cid:christ_header", "christ_header.png")
+                                    html_content = html_content.replace("cid:christ_header", "christ_header.png")
                             else:
-                                html_for_copy = html_content.replace("cid:christ_header", "christ_header.png")
-                            (fallback_dir / "message.html").write_text(html_for_copy, encoding="utf-8")
+                                html_content = html_content.replace("cid:christ_header", "christ_header.png")
+
+                            # Convert Thank You banner image to Base64 data URL
+                            if ty_src.exists():
+                                try:
+                                    b64_ty = base64.b64encode(ty_src.read_bytes()).decode("utf-8")
+                                    html_content = html_content.replace("cid:thank_you_banner", f"data:image/jpeg;base64,{b64_ty}")
+                                except Exception:
+                                    html_content = html_content.replace("cid:thank_you_banner", "thank_you_banner.jpeg")
+                            else:
+                                html_content = html_content.replace("cid:thank_you_banner", "thank_you_banner.jpeg")
+
+                            (fallback_dir / "message.html").write_text(html_content, encoding="utf-8")
 
                         loop.call_soon_threadsafe(
                             q.put_nowait,
