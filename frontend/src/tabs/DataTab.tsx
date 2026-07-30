@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut, Trash2 } from 'lucide-react'
+import { Save, FileImage, Type, Mail, CheckCircle2, FileSpreadsheet, Move, Lock, LogOut, Trash2, Sparkles } from 'lucide-react'
 import {
   BASE,
-  uploadExcel, uploadTemplate, clearTemplate, clearExcel,
+  uploadExcel, uploadTemplate, clearTemplate, loadOfficialPresetTemplate, clearExcel,
   getColumns, saveColumns,
   getActiveType, setActiveType,
   getCoordinatesPreview, getTextFields, saveTextFields,
@@ -423,6 +423,26 @@ export default function DataTab() {
       setTemplateLoading(false)
     }
   }, [activeCertType])
+
+  const handleLoadOfficialPreset = useCallback(async () => {
+    setTemplateLoading(true); setTemplateError('')
+    setGridImage('')
+    try {
+      const res = await loadOfficialPresetTemplate()
+      setTemplateMode('image')
+      setTemplatePath(res.image_template_path)
+      if (res.image_template_path_1st) setTemplatePath1st(res.image_template_path_1st)
+      if (res.image_template_path_2nd) setTemplatePath2nd(res.image_template_path_2nd)
+      if (res.image_template_path_3rd) setTemplatePath3rd(res.image_template_path_3rd)
+      
+      await new Promise(r => setTimeout(r, 300))
+      await handleGridPreview()
+    } catch (e: any) {
+      setTemplateError(e.message)
+    } finally {
+      setTemplateLoading(false)
+    }
+  }, [handleGridPreview])
 
   const handleSaveColumns = async () => {
     setColSaving(true); setColSaved(false)
@@ -977,11 +997,37 @@ export default function DataTab() {
 
       {/* ── Certificate Template ── */}
       <div className="card">
-        <div className="card-header"><FileImage size={18} /> Certificate Template</div>
+        <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FileImage size={18} /> Certificate Template
+          </div>
+          <button
+            className="btn btn-sm btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'linear-gradient(135deg, #004C6D 0%, #0284c7 100%)',
+              border: 'none',
+              fontWeight: 600,
+              boxShadow: '0 2px 8px rgba(0, 76, 109, 0.25)',
+              cursor: 'pointer',
+            }}
+            onClick={handleLoadOfficialPreset}
+            disabled={templateLoading}
+          >
+            <Sparkles size={14} /> Load Official ANVESHA '26 Design
+          </button>
+        </div>
         <div className="card-body">
-          <div className="flex gap-4 mb-4">
-            <label><input type="radio" checked={templateMode === 'docx'} onChange={() => setTemplateMode('docx')} /> Word (.docx)</label>
-            <label><input type="radio" checked={templateMode === 'image'} onChange={() => setTemplateMode('image')} /> Image / PDF</label>
+          <div className="flex gap-4 mb-4" style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <label><input type="radio" checked={templateMode === 'docx'} onChange={() => setTemplateMode('docx')} /> Word (.docx)</label>
+              <label><input type="radio" checked={templateMode === 'image'} onChange={() => setTemplateMode('image')} /> Image / PDF</label>
+            </div>
+            <div style={{ fontSize: 12, color: '#64748b' }}>
+              Official pre-loaded designs from <code>Finalised Anvesha Designs/</code> ready for 1-click loading.
+            </div>
           </div>
           {activeCertType === 'winner' && templateMode === 'image' ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 12 }}>

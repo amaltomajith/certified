@@ -3,7 +3,7 @@ types:
   participation:
     template_mode: image
     docx_template_path: ''
-    image_template_path: sample_data/participants.jpg
+    image_template_path: sample_data/participation.jpeg
     image_render_dpi: 300
     excel_path: ''
     excel_sheet_name: 0
@@ -66,7 +66,7 @@ types:
   winner:
     template_mode: image
     docx_template_path: ''
-    image_template_path: sample_data/1st.png
+    image_template_path: sample_data/1st.jpeg
     image_render_dpi: 300
     excel_path: ''
     excel_sheet_name: 0
@@ -77,9 +77,9 @@ types:
       poc_email: ''
       poc_name: ''
       position: ''
-    image_template_path_1st: sample_data/1st.png
-    image_template_path_2nd: sample_data/2nd.png
-    image_template_path_3rd: sample_data/3rd.png
+    image_template_path_1st: sample_data/1st.jpeg
+    image_template_path_2nd: sample_data/2nd.jpeg
+    image_template_path_3rd: sample_data/3rd.jpeg
     image_text_fields:
       student_name:
         x: 1265
@@ -207,7 +207,7 @@ types:
   school:
     template_mode: image
     docx_template_path: ''
-    image_template_path: sample_data/our students.jpg
+    image_template_path: sample_data/school certificates.jpeg
     image_render_dpi: 300
     excel_path: ''
     excel_sheet_name: 0
@@ -228,7 +228,7 @@ types:
   volunteer:
     template_mode: image
     docx_template_path: ''
-    image_template_path: ''
+    image_template_path: sample_data/volunteer.jpeg
     image_render_dpi: 300
     excel_path: ''
     excel_sheet_name: 0

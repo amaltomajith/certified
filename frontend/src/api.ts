@@ -155,6 +155,17 @@ export async function clearTemplate(winnerPosition?: '1st' | '2nd' | '3rd'): Pro
   return handleJSON(res);
 }
 
+export async function loadOfficialPresetTemplate(): Promise<{
+  status: string;
+  image_template_path: string;
+  image_template_path_1st?: string;
+  image_template_path_2nd?: string;
+  image_template_path_3rd?: string;
+}> {
+  const res = await fetch(`${BASE}/config/preset-template`, { method: 'POST' });
+  return handleJSON(res);
+}
+
 export async function getColumns(): Promise<{
   columns: ColumnMapping;
   excel_path: string;

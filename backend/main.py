@@ -495,6 +495,35 @@ def debug_cert_render():
         raise HTTPException(500, detail=f"Debug render error: {exc}")
 
 
+DEFAULT_FINALISED_DESIGNS = {
+    "participation": "sample_data/participation.jpeg",
+    "winner": {
+        "1st": "sample_data/1st.jpeg",
+        "2nd": "sample_data/2nd.jpeg",
+        "3rd": "sample_data/3rd.jpeg",
+        "default": "sample_data/1st.jpeg",
+    },
+    "school": "sample_data/school certificates.jpeg",
+    "volunteer": "sample_data/volunteer.jpeg",
+}
+
+def resolve_template_path(active_cfg, active_type, winner_position=None):
+    tpl = ""
+    if active_type == "winner" and winner_position in ("1st", "2nd", "3rd"):
+        tpl = active_cfg.get(f"image_template_path_{winner_position}", "")
+    if not tpl or not (ROOT / tpl).exists():
+        tpl = active_cfg.get("image_template_path", "")
+
+    if not tpl or not (ROOT / tpl).exists():
+        defaults = DEFAULT_FINALISED_DESIGNS.get(active_type, "")
+        if isinstance(defaults, dict):
+            tpl = defaults.get(winner_position, defaults.get("default", ""))
+        else:
+            tpl = defaults
+
+    return tpl
+
+
 # ---------- Coordinates Preview (image mode) ----------
 
 @app.post("/coordinates/preview")
@@ -503,12 +532,7 @@ def coordinates_preview(winner_position: Optional[str] = None):
     at = cfg.get("active_type", "participation")
     active_cfg = get_active_cfg(cfg)
     
-    tpl = ""
-    if at == "winner" and winner_position in ("1st", "2nd", "3rd"):
-        tpl = active_cfg.get(f"image_template_path_{winner_position}", "")
-    if not tpl:
-        tpl = active_cfg.get("image_template_path", "")
-
+    tpl = resolve_template_path(active_cfg, at, winner_position)
     template_path = ROOT / tpl if tpl else None
 
     if not template_path or not template_path.exists():
@@ -548,11 +572,51 @@ def coordinates_preview(winner_position: Optional[str] = None):
 @app.get("/config/template")
 def get_template_config():
     cfg = read_config()
+    at = cfg.get("active_type", "participation")
     active_cfg = get_active_cfg(cfg)
+
+    path_default = resolve_template_path(active_cfg, at)
+    p1 = resolve_template_path(active_cfg, at, "1st") if at == "winner" else ""
+    p2 = resolve_template_path(active_cfg, at, "2nd") if at == "winner" else ""
+    p3 = resolve_template_path(active_cfg, at, "3rd") if at == "winner" else ""
+
     return {
-        "template_mode": active_cfg.get("template_mode", "docx"),
-        "image_template_path": active_cfg.get("image_template_path", ""),
+        "template_mode": active_cfg.get("template_mode", "image"),
+        "image_template_path": active_cfg.get("image_template_path") or path_default,
         "docx_template_path": active_cfg.get("docx_template_path", ""),
+        "image_template_path_1st": active_cfg.get("image_template_path_1st") or p1,
+        "image_template_path_2nd": active_cfg.get("image_template_path_2nd") or p2,
+        "image_template_path_3rd": active_cfg.get("image_template_path_3rd") or p3,
+        "official_preset_available": True,
+    }
+
+
+@app.post("/config/preset-template")
+def reset_official_preset_template():
+    """Reset template paths in config.yaml to the official pre-loaded ANVESHA designs."""
+    cfg = read_config()
+    at = cfg.get("active_type", "participation")
+    active_cfg = cfg.get("types", {}).get(at, {})
+    active_cfg["template_mode"] = "image"
+
+    if at == "winner":
+        active_cfg["image_template_path"] = "sample_data/1st.jpeg"
+        active_cfg["image_template_path_1st"] = "sample_data/1st.jpeg"
+        active_cfg["image_template_path_2nd"] = "sample_data/2nd.jpeg"
+        active_cfg["image_template_path_3rd"] = "sample_data/3rd.jpeg"
+    elif at == "participation":
+        active_cfg["image_template_path"] = "sample_data/participation.jpeg"
+    elif at == "school":
+        active_cfg["image_template_path"] = "sample_data/school certificates.jpeg"
+    elif at == "volunteer":
+        active_cfg["image_template_path"] = "sample_data/volunteer.jpeg"
+
+    cfg["types"][at] = active_cfg
+    write_config(cfg)
+    return {
+        "status": "ok",
+        "active_type": at,
+        "image_template_path": active_cfg.get("image_template_path"),
         "image_template_path_1st": active_cfg.get("image_template_path_1st", ""),
         "image_template_path_2nd": active_cfg.get("image_template_path_2nd", ""),
         "image_template_path_3rd": active_cfg.get("image_template_path_3rd", ""),
