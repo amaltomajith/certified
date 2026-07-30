@@ -39,8 +39,8 @@ def main():
         draw.line([(0, y), (w, y)], fill=(0, 120, 255), width=1)
         draw.text((2, y + 2), str(y), fill=(0, 120, 255))
 
-    os.makedirs(cfg["output_dir"], exist_ok=True)
-    out_path = os.path.join(cfg["output_dir"], "grid_preview.png")
+    os.makedirs(cfg.get("output_dir", "output"), exist_ok=True)
+    out_path = os.path.join(cfg.get("output_dir", "output"), "grid_preview.png")
     img.save(out_path)
     print(f"Grid preview saved to {out_path} (image is {w}x{h}px). Open it, then update config.yaml.")
 

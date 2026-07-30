@@ -566,7 +566,7 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
 
 def main():
     cfg = load_config()
-    manifest_path = os.path.join(cfg["output_dir"], "manifest.csv")
+    manifest_path = os.path.join(cfg.get("output_dir", "output"), "manifest.csv")
 
     if not os.path.exists(manifest_path):
         print(f"No manifest found at {manifest_path}. Run generate_certificates.py first.")

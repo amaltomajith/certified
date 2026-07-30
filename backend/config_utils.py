@@ -109,7 +109,8 @@ def read_config() -> dict:
 
 
 def write_config(cfg: dict) -> None:
-    """Write the entire config dict back to config.yaml."""
+    """Write the entire config dict back to config.yaml, always preserving output_dir."""
+    cfg.setdefault("output_dir", "output")
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         yaml.dump(cfg, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 

@@ -199,7 +199,7 @@ def load_roster(cfg):
 
 def generate_docx_mode(df, cfg):
     active_cfg = get_active_cfg(cfg)
-    out_dir = cfg["output_dir"]
+    out_dir = cfg.get("output_dir", "output")
     docx_dir = os.path.join(out_dir, "docx")
     pdf_dir = os.path.join(out_dir, "pdf")
     os.makedirs(docx_dir, exist_ok=True)
@@ -305,7 +305,7 @@ def load_base_image(template_path, dpi=300):
 def generate_image_mode(df, cfg):
     active_cfg = get_active_cfg(cfg)
     at = cfg.get("active_type", "participation")
-    out_dir = cfg["output_dir"]
+    out_dir = cfg.get("output_dir", "output")
     pdf_dir = os.path.join(out_dir, "pdf")
     os.makedirs(pdf_dir, exist_ok=True)
 
@@ -389,7 +389,7 @@ def main():
         print(f"Unknown template_mode '{mode}' — must be 'docx' or 'image'.", file=sys.stderr)
         sys.exit(1)
 
-    manifest_path = os.path.join(cfg["output_dir"], "manifest.csv")
+    manifest_path = os.path.join(cfg.get("output_dir", "output"), "manifest.csv")
     manifest.to_csv(manifest_path, index=False)
 
     missing_pdfs = manifest[~manifest["pdf_path"].apply(os.path.exists)]
