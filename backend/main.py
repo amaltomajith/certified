@@ -1303,9 +1303,16 @@ async def send_endpoint(body: SendRequest):
                         if header_src.exists():
                             shutil.copy2(header_src, fallback_dir / "christ_header.png")
 
-                        ty_src = ROOT / "htmlbodymail" / "Anvesha Participant Appreciation.jpg.jpeg"
+                        if at == "school":
+                            ty_fn = "Anvesha School Appreciation.jpg.jpeg"
+                        elif at == "volunteer":
+                            ty_fn = "Anvesha Volunteer Appreciation.jpg.jpeg"
+                        else:
+                            ty_fn = "Anvesha Participant Appreciation.jpg.jpeg"
+
+                        ty_src = ROOT / "htmlbodymail" / ty_fn
                         if not ty_src.exists():
-                            ty_src = ROOT / "sample_data" / "Anvesha Participant Appreciation.jpg.jpeg"
+                            ty_src = ROOT / "sample_data" / ty_fn
                         if ty_src.exists():
                             shutil.copy2(ty_src, fallback_dir / "thank_you_banner.jpeg")
 

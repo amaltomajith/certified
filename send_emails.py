@@ -335,10 +335,23 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     except Exception:
         body_html_content = f"Dear <strong>{poc_name or poc_email}</strong>,<br><br>Please find your certificate attached."
 
-    # Locate Thank You graphic if present
-    ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlbodymail", "Anvesha Participant Appreciation.jpg.jpeg")
+    # Dynamic Appreciation Banner selection based on active_type
+    if at == "school":
+        ty_filename = "Anvesha School Appreciation.jpg.jpeg"
+        banner_title = "ANVESHA '26 — Institutional Certificate of Appreciation"
+    elif at == "volunteer":
+        ty_filename = "Anvesha Volunteer Appreciation.jpg.jpeg"
+        banner_title = "ANVESHA '26 — Volunteer Certificate of Appreciation"
+    elif at == "winner":
+        ty_filename = "Anvesha Participant Appreciation.jpg.jpeg"
+        banner_title = "ANVESHA '26 — Winner Certificates of Recognition"
+    else:
+        ty_filename = "Anvesha Participant Appreciation.jpg.jpeg"
+        banner_title = "ANVESHA '26 — Participation Certificates"
+
+    ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlbodymail", ty_filename)
     if not os.path.exists(ty_img_path):
-        ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", "Anvesha Participant Appreciation.jpg.jpeg")
+        ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", ty_filename)
     has_ty_img = os.path.exists(ty_img_path)
 
     thank_you_banner_html = (
@@ -401,8 +414,8 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
            <tbody> 
             <tr> 
              <td align="left" class="mainContent" style="background-color: #ffffff; padding: 30px 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); font-family: 'Georgia', serif; font-size: 15px; color: #333333; line-height: 1.6;" valign="top"> 
-              <div style="text-align: center; font-family: 'Georgia', serif; font-size: 22px; color: #004C6D; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-               ANVESHA 2026
+              <div style="text-align: center; font-family: 'Georgia', serif; font-size: 20px; color: #004C6D; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+               {banner_title}
               </div> 
               {html_body_paragraphs}
              </td> 
