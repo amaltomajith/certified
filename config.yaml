@@ -1,237 +1,266 @@
-active_type: winner
+active_type: participation
 types:
   participation:
     template_mode: image
     docx_template_path: ''
     image_template_path: sample_data/participation.jpeg
     image_render_dpi: 300
-    excel_path: ''
+    excel_path: sample_data/Participation_1785490441.xlsx
     excel_sheet_name: 0
     columns:
-      student_name: ''
-      school: ''
-      event_name: ''
-      poc_email: ''
-      poc_name: ''
+      student_name: Participant Name
+      event_name: Events
+      poc_email: POC Email
+      poc_name: Poc Name
+      school: F
     image_text_fields:
       student_name:
-        x: 2199
-        y: 1316
+        x: 2368
+        y: 1156
         color: '#000000'
         align: center
         font_path: sample_data/PlayfairDisplay-SemiBold.ttf
-        font_family: "'Playfair Display', serif"
+        font_family: '''Playfair Display'', serif'
         font_size: 72
         is_bold: false
         width: 506
       event_name:
-        x: 1508
-        y: 1477
+        x: 1506
+        y: 1459
         color: '#000000'
         align: center
         font_path: sample_data/PlayfairDisplay-SemiBold.ttf
-        font_family: "'Playfair Display', serif"
+        font_family: '''Playfair Display'', serif'
         font_size: 72
         is_bold: false
         width: 792
       school:
-        x: 1582
-        y: 1804
+        x: 2160
+        y: 1276
         color: '#000000'
         align: center
         font_path: sample_data/PlayfairDisplay-SemiBold.ttf
-        font_family: "'Playfair Display', serif"
+        font_family: '''Playfair Display'', serif'
         font_size: 72
         is_bold: false
         width: 849
     email:
-      subject_template: "ANVESHA '26 | Participation Certificates & Contingent Summary - {school}"
-      body_template: |
-        Dear {poc_name},
+      subject_template: ANVESHA '26 | Participation Certificates & Contingent Summary
+        - {school}
+      body_template: 'Dear {poc_name},
+
 
         Greetings from the ANVESHA Organizing Team.
 
-        We are writing to extend our sincere gratitude to you for coordinating and managing your student contingent for ANVESHA '26, held at CHRIST (Deemed to be University), Kengeri Campus. The dedication, talent, and sportsmanship displayed by your students added immense value to the competitive spirit and overall success of the fest.
 
-        To acknowledge their efforts, please find their participation certificates organized by event in the Google Drive folder linked below, along with the attached Excel sheet containing their respective names and events.
+        We are writing to extend our sincere gratitude to you for coordinating and
+        managing your student contingent for ANVESHA ''26, held at CHRIST (Deemed
+        to be University), Kengeri Campus. The dedication, talent, and sportsmanship
+        displayed by your students added immense value to the competitive spirit and
+        overall success of the fest.
+
+
+        To acknowledge their efforts, please find their participation certificates
+        organized by event in the Google Drive folder linked below, along with the
+        attached Excel sheet containing their respective names and events.
+
 
         {student_list}
 
-        Kindly review the shared details and let us know if any student or certificate has been left out or requires any correction. We request you to distribute these certificates to the respective students at your earliest convenience.
 
-        Thank you once again for your cooperation and vital support. We look forward to welcoming your institution back to our campus for upcoming events, competitions, and fests.
+        Kindly review the shared details and let us know if any student or certificate
+        has been left out or requires any correction. We request you to distribute
+        these certificates to the respective students at your earliest convenience.
+
+
+        Thank you once again for your cooperation and vital support. We look forward
+        to welcoming your institution back to our campus for upcoming events, competitions,
+        and fests.
+
 
         With warm thanks and gratitude,
-        The ANVESHA '26 Organizing Team
+
+        The ANVESHA ''26 Organizing Team
+
+        '
   winner:
     template_mode: image
     docx_template_path: ''
     image_template_path: sample_data/1st.jpeg
     image_render_dpi: 300
-    excel_path: ''
+    excel_path: sample_data/Participation_1785490413.xlsx
     excel_sheet_name: 0
     columns:
-      student_name: ''
-      school: ''
-      event_name: ''
-      poc_email: ''
-      poc_name: ''
-      position: ''
+      student_name: Poc Name
+      event_name: Events
+      poc_email: POC Email
+      poc_name: Poc Name
     image_template_path_1st: sample_data/1st.jpeg
     image_template_path_2nd: sample_data/2nd.jpeg
     image_template_path_3rd: sample_data/3rd.jpeg
     image_text_fields:
       student_name:
-        x: 1265
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1281
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1265
-        y: 1011
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_1st:
       student_name:
-        x: 1265
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1281
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1265
-        y: 1011
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_2nd:
       student_name:
-        x: 1284
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1301
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1251
-        y: 1008
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_3rd:
       student_name:
-        x: 1251
-        y: 864
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1306
-        y: 1152
-        color: '#ff0000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1264
-        y: 1011
-        color: '#ff0000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-      school:
-        x: 1264
-        y: 1011
-        color: '#ff0000'
-        align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     email:
-      subject_template: "Certificate of Recognition - ANVESHA '26 Winners - {school}"
-      body_template: |
-        Dear {poc_name},
+      subject_template: Certificate of Recognition - ANVESHA '26 Winners - {school}
+      body_template: 'Dear {poc_name},
+
 
         Greetings from the ANVESHA Organizing Team.
 
-        We are writing to extend our heartiest congratulations to your student contingent for their outstanding performance at ANVESHA '26, held at CHRIST (Deemed to be University), Kengeri Campus. The dedication, talent, and excellence displayed by your students earned them well-deserved laurels and significantly raised the competitive spirit of the fest.
 
-        To celebrate their achievement, please find their certificates of recognition (for 1st, 2nd, and 3rd prize winners) organized by event in the Google Drive folder linked below. We have also attached an Excel sheet detailing student names, events, and positions secured.
+        We are writing to extend our heartiest congratulations to your student contingent
+        for their outstanding performance at ANVESHA ''26, held at CHRIST (Deemed
+        to be University), Kengeri Campus. The dedication, talent, and excellence
+        displayed by your students earned them well-deserved laurels and significantly
+        raised the competitive spirit of the fest.
+
+
+        To celebrate their achievement, please find their certificates of recognition
+        (for 1st, 2nd, and 3rd prize winners) organized by event in the Google Drive
+        folder linked below. We have also attached an Excel sheet detailing student
+        names, events, and positions secured.
+
 
         {student_list}
 
-        Kindly review the shared details and let us know if any student or certificate has been left out or requires any correction. We request you to distribute these certificates to the respective winners at your earliest convenience.
 
-        Thank you once again for your cooperation and vital support. We look forward to welcoming your institution back to our campus for upcoming events, competitions, and fests.
+        Kindly review the shared details and let us know if any student or certificate
+        has been left out or requires any correction. We request you to distribute
+        these certificates to the respective winners at your earliest convenience.
+
+
+        Thank you once again for your cooperation and vital support. We look forward
+        to welcoming your institution back to our campus for upcoming events, competitions,
+        and fests.
+
 
         With warm thanks and gratitude,
-        The ANVESHA '26 Organizing Team
+
+        The ANVESHA ''26 Organizing Team
+
+        '
   school:
     template_mode: image
     docx_template_path: ''
@@ -253,25 +282,40 @@ types:
         color: '#13314B'
         align: center
         font_path: sample_data/PlayfairDisplay-SemiBold.ttf
-        font_family: "'Playfair Display', serif"
+        font_family: '''Playfair Display'', serif'
         font_size: 75
         is_bold: true
         width: 1347
     email:
-      subject_template: "Certificate of Appreciation - ANVESHA '26 Institutional Support - {school}"
-      body_template: |
-        Dear {school},
+      subject_template: Certificate of Appreciation - ANVESHA '26 Institutional Support
+        - {school}
+      body_template: 'Dear {school},
+
 
         Greetings from the ANVESHA Organizing Team.
 
-        We are writing to extend our sincere gratitude to your institution for your valuable support and enthusiastic participation in ANVESHA '26, held at CHRIST (Deemed to be University), Kengeri Campus on 22nd – 23rd July 2026. Your school's wholehearted involvement, energy, and contribution played a vital role in making this fest a memorable success.
 
-        As a token of our deep appreciation, please find attached your institution's Certificate of Appreciation to commend your outstanding dedication and support.
+        We are writing to extend our sincere gratitude to your institution for your
+        valuable support and enthusiastic participation in ANVESHA ''26, held at CHRIST
+        (Deemed to be University), Kengeri Campus on 22nd – 23rd July 2026. Your school''s
+        wholehearted involvement, energy, and contribution played a vital role in
+        making this fest a memorable success.
 
-        Thank you once again for being an integral part of ANVESHA '26. We look forward to a continued relationship and to welcoming your institution back to our campus for upcoming events and programs.
+
+        As a token of our deep appreciation, please find attached your institution''s
+        Certificate of Appreciation to commend your outstanding dedication and support.
+
+
+        Thank you once again for being an integral part of ANVESHA ''26. We look forward
+        to a continued relationship and to welcoming your institution back to our
+        campus for upcoming events and programs.
+
 
         With warm thanks and gratitude,
-        The ANVESHA '26 Organizing Team
+
+        The ANVESHA ''26 Organizing Team
+
+        '
   volunteer:
     template_mode: image
     docx_template_path: ''
@@ -289,29 +333,44 @@ types:
         color: '#13314B'
         align: center
         font_path: sample_data/PlayfairDisplay-SemiBold.ttf
-        font_family: "'Playfair Display', serif"
+        font_family: '''Playfair Display'', serif'
         font_size: 75
         is_bold: true
         width: 1000
     email:
-      subject_template: "Certificate of Appreciation - ANVESHA '26 Organizing Team Volunteer - {volunteer_name}"
-      body_template: |
-        Dear {volunteer_name},
+      subject_template: Certificate of Appreciation - ANVESHA '26 Organizing Team
+        Volunteer - {volunteer_name}
+      body_template: 'Dear {volunteer_name},
+
 
         Greetings from the ANVESHA Organizing Team.
 
-        We are writing to express our heartfelt gratitude to you for your hard work and commitment as a volunteer for ANVESHA '26, held on 22nd and 23rd July 2026 at CHRIST (Deemed to be University), Kengeri Campus. You were an integral member of the organizing team, and your contribution behind the scenes was essential to the smooth execution and overall success of the fest.
 
-        To acknowledge your efforts and dedication, please find your Certificate of Appreciation attached directly to this email.
+        We are writing to express our heartfelt gratitude to you for your hard work
+        and commitment as a volunteer for ANVESHA ''26, held on 22nd and 23rd July
+        2026 at CHRIST (Deemed to be University), Kengeri Campus. You were an integral
+        member of the organizing team, and your contribution behind the scenes was
+        essential to the smooth execution and overall success of the fest.
 
-        Thank you once again for your vital support, responsibility, and enthusiasm. We look forward to welcoming you to future campus events and wish you the very best in all your future endeavors.
+
+        To acknowledge your efforts and dedication, please find your Certificate of
+        Appreciation attached directly to this email.
+
+
+        Thank you once again for your vital support, responsibility, and enthusiasm.
+        We look forward to welcoming you to future campus events and wish you the
+        very best in all your future endeavors.
+
 
         With warm thanks and gratitude,
-        The ANVESHA '26 Organizing Team
+
+        The ANVESHA ''26 Organizing Team
+
+        '
 output_dir: output
 email:
   dry_run: false
-  sender_email: ''
+  sender_email: anvesha@fest.christuniversity.in
   sender_app_password: ''
   sender_name: Event Certification Team
   smtp_host: smtp.gmail.com

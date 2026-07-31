@@ -82,137 +82,128 @@ types:
     image_template_path_3rd: sample_data/3rd.jpeg
     image_text_fields:
       student_name:
-        x: 1265
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1281
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1265
-        y: 1011
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_1st:
       student_name:
-        x: 1265
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1281
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1265
-        y: 1011
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_2nd:
       student_name:
-        x: 1284
-        y: 863
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1301
-        y: 1152
-        color: '#000000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1251
-        y: 1008
-        color: '#000000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     image_text_fields_3rd:
       student_name:
-        x: 1251
-        y: 864
-        color: '#000000'
+        x: 1914
+        y: 1200
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 716
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1343
       event_name:
-        x: 1306
-        y: 1152
-        color: '#ff0000'
+        x: 2456
+        y: 1456
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 684
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 60
+        is_bold: false
+        width: 799
       school:
-        x: 1264
-        y: 1011
-        color: '#ff0000'
+        x: 1524
+        y: 1356
+        color: '#13314B'
         align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-      school:
-        x: 1264
-        y: 1011
-        color: '#ff0000'
-        align: center
-        font_path: sample_data/DancingScript-Regular.ttf
-        font_family: "'Dancing Script', cursive"
-        font_size: 75
-        is_bold: true
-        width: 773
+        font_path: sample_data/PlayfairDisplay-SemiBold.ttf
+        font_family: "'Playfair Display', serif"
+        font_size: 65
+        is_bold: false
+        width: 1731
     email:
       subject_template: "Certificate of Recognition - ANVESHA '26 Winners - {school}"
       body_template: |
