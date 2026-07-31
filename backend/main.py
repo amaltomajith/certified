@@ -207,7 +207,7 @@ async def upload_excel(file: UploadFile = File(...)):
     active_cfg["excel_path"] = rel_path
     # Setup default mappings based on type
     if at == "school":
-        active_cfg["columns"] = {"school": "", "poc_email": "", "poc_name": ""}
+        active_cfg["columns"] = {"school": "", "poc1": "", "poc2": "", "poc3": "", "poc4": "", "poc5": ""}
     elif at == "volunteer":
         active_cfg["columns"] = {"volunteer_name": "", "volunteer_email": ""}
     else:
@@ -230,7 +230,7 @@ def clear_excel():
     active_cfg = cfg.get("types", {}).get(at, {})
     active_cfg["excel_path"] = ""
     if at == "school":
-        active_cfg["columns"] = {"school": "", "poc_email": "", "poc_name": ""}
+        active_cfg["columns"] = {"school": "", "poc1": "", "poc2": "", "poc3": "", "poc4": "", "poc5": ""}
     elif at == "volunteer":
         active_cfg["columns"] = {"volunteer_name": "", "volunteer_email": ""}
     else:
