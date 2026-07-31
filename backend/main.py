@@ -604,12 +604,19 @@ def reset_official_preset_template():
         active_cfg["image_template_path_1st"] = "sample_data/1st.jpeg"
         active_cfg["image_template_path_2nd"] = "sample_data/2nd.jpeg"
         active_cfg["image_template_path_3rd"] = "sample_data/3rd.jpeg"
+        active_cfg.pop("image_text_fields", None)
+        active_cfg.pop("image_text_fields_1st", None)
+        active_cfg.pop("image_text_fields_2nd", None)
+        active_cfg.pop("image_text_fields_3rd", None)
     elif at == "participation":
         active_cfg["image_template_path"] = "sample_data/participation.jpeg"
+        active_cfg.pop("image_text_fields", None)
     elif at == "school":
         active_cfg["image_template_path"] = "sample_data/school certificates.jpeg"
+        active_cfg.pop("image_text_fields", None)
     elif at == "volunteer":
         active_cfg["image_template_path"] = "sample_data/volunteer.jpeg"
+        active_cfg.pop("image_text_fields", None)
 
     cfg["types"][at] = active_cfg
     write_config(cfg)
@@ -714,10 +721,16 @@ def reset_text_fields(winner_position: Optional[str] = None):
     at = cfg.get("active_type", "participation")
     active_cfg = cfg.get("types", {}).get(at, {})
 
-    if at == "winner" and winner_position in ("1st", "2nd", "3rd"):
-        active_cfg[f"image_text_fields_{winner_position}"] = {}
-    if at != "winner" or winner_position == "1st":
-        active_cfg["image_text_fields"] = {}
+    if at == "winner":
+        if winner_position in ("1st", "2nd", "3rd"):
+            active_cfg.pop(f"image_text_fields_{winner_position}", None)
+        else:
+            active_cfg.pop("image_text_fields", None)
+            active_cfg.pop("image_text_fields_1st", None)
+            active_cfg.pop("image_text_fields_2nd", None)
+            active_cfg.pop("image_text_fields_3rd", None)
+    else:
+        active_cfg.pop("image_text_fields", None)
 
     cfg["types"][at] = active_cfg
     write_config(cfg)
