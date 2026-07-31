@@ -793,10 +793,10 @@ async def generate_endpoint():
     async def _stream():
         while True:
             try:
-                msg = await asyncio.wait_for(q.get(), timeout=300.0)
+                msg = await asyncio.wait_for(q.get(), timeout=10.0)
             except asyncio.TimeoutError:
-                yield _sse("[timeout — generation took too long]")
-                break
+                yield ": ping\n\n"
+                continue
             yield _sse(msg)
             if msg == "__DONE__":
                 break
@@ -1265,8 +1265,8 @@ async def send_endpoint(body: SendRequest):
                 drive_data = None
                 if at not in ["school", "volunteer"]:
                     try:
-                        from drive_service import is_drive_available, upload_poc_certificates_to_drive
-                        if is_drive_available():
+                        from drive_service import is_oauth_drive_available, upload_poc_certificates_to_drive
+                        if is_oauth_drive_available():
                             loop.call_soon_threadsafe(
                                 q.put_nowait, f"  → Uploading certificates to Google Drive for {poc_email}..."
                             )
@@ -1450,10 +1450,10 @@ async def send_endpoint(body: SendRequest):
     async def _stream():
         while True:
             try:
-                msg = await asyncio.wait_for(q.get(), timeout=600.0)
+                msg = await asyncio.wait_for(q.get(), timeout=10.0)
             except asyncio.TimeoutError:
-                yield _sse("[timeout]")
-                break
+                yield ": ping\n\n"
+                continue
             yield _sse(msg)
             if msg == "__DONE__":
                 break
