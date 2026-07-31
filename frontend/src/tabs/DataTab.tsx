@@ -348,7 +348,10 @@ export default function DataTab() {
         } else if (key === 'poc_email' || key === 'volunteer_email') {
           match = excelColumns.find(col => /poc_email|poc email|email/i.test(col))
         } else if (key === 'student_name' || key === 'volunteer_name') {
-          match = excelColumns.find(col => /student|candidate|participant|volunteer|name/i.test(col))
+          match = excelColumns.find(col => /student|candidate|participant|volunteer/i.test(col))
+          if (!match) {
+            match = excelColumns.find(col => /name/i.test(col) && !/school|institution|college|poc|coordinator/i.test(col))
+          }
         } else if (key === 'event_name') {
           match = excelColumns.find(col => /event|competition|activity/i.test(col))
         } else if (key === 'poc_name') {
