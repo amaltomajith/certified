@@ -28,7 +28,7 @@ def _ensure_config_exists() -> None:
                     "volunteer": {"template_mode": "image", "excel_path": "", "columns": {}, "image_text_fields": {}},
                 },
                 "output_dir": "output",
-                "email": {"dry_run": False, "sender_email": "", "sender_app_password": "", "smtp_host": "smtp.gmail.com", "smtp_port": 465},
+                "email": {"dry_run": False, "sender_email": "", "sender_app_password": "", "sender_name": "ANVESHA Organizing Team", "smtp_host": "smtp.gmail.com", "smtp_port": 465},
             }
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
                 yaml.dump(default_cfg, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
@@ -104,6 +104,11 @@ def read_config() -> dict:
         cfg["email"]["sender_email"] = env_email
     if env_pass and not cfg["email"].get("sender_app_password"):
         cfg["email"]["sender_app_password"] = env_pass
+
+    # Ensure sender_name always has a fallback so build_email never KeyErrors
+    cfg["email"].setdefault("sender_name", "ANVESHA Organizing Team")
+    cfg["email"].setdefault("smtp_host", "smtp.gmail.com")
+    cfg["email"].setdefault("smtp_port", 465)
 
     return cfg
 

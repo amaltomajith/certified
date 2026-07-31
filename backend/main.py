@@ -1131,6 +1131,10 @@ async def send_endpoint(body: SendRequest):
             global_ecfg = cfg.get("email", {})
             type_ecfg = active_cfg.get("email", {})
             ecfg = {**global_ecfg, **type_ecfg}
+            # Inject session-stored sender email (overrides blank YAML value)
+            session_email = get_sender_email()
+            if session_email:
+                ecfg["sender_email"] = session_email
             # Always send to real POC emails — no dry_run mode
             ecfg["dry_run"] = False
             cfg_patched = {**cfg, "email": ecfg}
@@ -1263,6 +1267,7 @@ async def send_endpoint(body: SendRequest):
                         )
 
                 try:
+                    msg = None  # always bound before fallback handler checks it
                     msg = build_email(
                         poc_name, poc_email, poc_email, event_name,
                         student_names, pdf_paths, cfg_patched, group,
@@ -1337,10 +1342,10 @@ async def send_endpoint(body: SendRequest):
                         except Exception:
                             pass
 
-                        subject = str(msg["Subject"]) if msg["Subject"] else "(no subject)"
+                        subject = str(msg["Subject"]) if (msg is not None and msg["Subject"]) else "(no subject)"
                         
                         # 1. Plain text fallback message
-                        body_part = msg.get_body(preferencelist=("plain",))
+                        body_part = msg.get_body(preferencelist=("plain",)) if msg is not None else None
                         body_text = body_part.get_content() if body_part else "(no body)"
                         message_txt = (
                             f"TO: {poc_email}\n"
@@ -1355,7 +1360,7 @@ async def send_endpoint(body: SendRequest):
                         (fallback_dir / "message.txt").write_text(message_txt, encoding="utf-8")
 
                         # 2. HTML fallback message (perfect for copying/pasting directly into Gmail)
-                        html_part = msg.get_body(preferencelist=("html",))
+                        html_part = msg.get_body(preferencelist=("html",)) if msg is not None else None
                         if html_part:
                             html_content = html_part.get_content()
                             import base64

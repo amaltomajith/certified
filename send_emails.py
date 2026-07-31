@@ -445,7 +445,7 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
 
     msg = EmailMessage()
     msg["Subject"] = subject
-    msg["From"] = f"{ecfg['sender_name']} <{ecfg['sender_email']}>"
+    msg["From"] = f"{ecfg.get('sender_name', 'ANVESHA Organizing Team')} <{ecfg.get('sender_email', '')}>"
 
     dry_run = ecfg.get("dry_run", False)
     dry_run_recipient = ecfg.get("dry_run_recipient", "")
