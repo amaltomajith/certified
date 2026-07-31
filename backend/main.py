@@ -1208,7 +1208,11 @@ async def send_endpoint(body: SendRequest):
 
             import time
 
-            for poc_email, group in df.groupby("poc_email"):
+            # School type: group by school name (cluster_id), others by poc_email
+            group_key = "cluster_id" if at == "school" else "poc_email"
+
+            for group_val, group in df.groupby(group_key):
+                poc_email = group["poc_email"].iloc[0]
                 # Safely read optional columns from manifest
                 poc_name = (
                     group["poc_name"].iloc[0]
@@ -1222,6 +1226,13 @@ async def send_endpoint(body: SendRequest):
                 )
                 student_names = group["student_name"].tolist()
                 pdf_paths = group["pdf_path"].tolist()
+
+                # CC emails for school type (poc2–poc5)
+                cc_emails = (
+                    group["cc_emails"].iloc[0]
+                    if "cc_emails" in group.columns
+                    else ""
+                )
 
                 # Google Drive Automated Upload Integration (bulk mode only)
                 drive_data = None
@@ -1254,7 +1265,8 @@ async def send_endpoint(body: SendRequest):
                 try:
                     msg = build_email(
                         poc_name, poc_email, poc_email, event_name,
-                        student_names, pdf_paths, cfg_patched, group, drive_data=drive_data
+                        student_names, pdf_paths, cfg_patched, group,
+                        drive_data=drive_data, cc_emails=cc_emails
                     )
                     _send_one(msg)
                     actual_to = str(msg["To"])

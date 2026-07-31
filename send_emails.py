@@ -227,7 +227,7 @@ def generate_excel_bytes(student_names, pdf_paths, group_df=None, active_type="p
     return excel_buffer.getvalue()
 
 
-def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_paths, cfg, group_df=None, drive_data=None):
+def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_paths, cfg, group_df=None, drive_data=None, cc_emails=None):
     at = str(cfg.get("active_type", "participation")).lower()
     active_cfg = cfg.get("types", {}).get(at, {})
     global_ecfg = cfg.get("email", {})
@@ -450,6 +450,12 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     dry_run = ecfg.get("dry_run", False)
     dry_run_recipient = ecfg.get("dry_run_recipient", "")
     msg["To"] = dry_run_recipient if (dry_run and dry_run_recipient) else poc_email
+
+    # Apply CC for school type (poc2–poc5)
+    if cc_emails and not (dry_run and dry_run_recipient):
+        cc_list = [e.strip() for e in str(cc_emails).replace(",", ";").split(";") if e.strip() and e.strip().lower() not in ("", "nan", "none")]
+        if cc_list:
+            msg["Cc"] = ", ".join(cc_list)
     
     msg.set_content(body_text)
     msg.add_alternative(html_email, subtype="html")

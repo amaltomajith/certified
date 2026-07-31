@@ -150,7 +150,7 @@ def load_roster(cfg):
     # Required fields based on active_type
     at = cfg.get("active_type", "participation")
     if at == "school":
-        req = ["school", "poc_email"]
+        req = ["school", "poc1"]
     elif at == "volunteer":
         req = ["volunteer_name", "poc_email"]
     else:
@@ -159,6 +159,24 @@ def load_roster(cfg):
     for r in req:
         if r not in df.columns:
             raise ValueError(f"Required field '{r}' missing — check the `columns:` mapping in config.yaml")
+
+    # School type: synthesize poc_email from poc1, and collect cc_emails from poc2–poc5
+    if at == "school":
+        df["poc_email"] = df["poc1"].astype(str).str.strip()
+        # Collect CC columns — only include non-empty values
+        poc_cc_cols = [c for c in ["poc2", "poc3", "poc4", "poc5"] if c in df.columns]
+        def _collect_ccs(row):
+            ccs = []
+            for c in poc_cc_cols:
+                val = str(row.get(c, "")).strip()
+                if val and val.lower() not in ("nan", "none", ""):
+                    ccs.append(val)
+            return "; ".join(ccs)
+        df["cc_emails"] = df.apply(_collect_ccs, axis=1)
+        # For school, cluster by school name (one cert per school, one email per school)
+        df["cluster_id"] = df["school"].astype(str).str.strip()
+        df["poc_name"] = df["school"].astype(str).str.strip()
+        df["student_name"] = df["school"].astype(str).str.strip()
 
     # If volunteer type, ensure student_name and volunteer_email mirror volunteer_name and poc_email
     if at == "volunteer":
@@ -175,21 +193,27 @@ def load_roster(cfg):
     if "event_name" not in df.columns and "event_name" not in req:
         df["event_name"] = ""
 
-    # cluster_id: always derived from poc_email prefix — not user-mapped
-    # Different poc_email = different cluster/POC group
-    df["cluster_id"] = df["poc_email"].apply(lambda e: str(e).split("@")[0])
+    # cluster_id: always derived from poc_email prefix — not user-mapped (skip for school, already set)
+    if "cluster_id" not in df.columns:
+        df["cluster_id"] = df["poc_email"].apply(lambda e: str(e).split("@")[0])
 
     # poc_name: use custom mapping if present, otherwise fallback to cluster_id (email prefix)
-    if "poc_name" in df.columns:
-        df["poc_name"] = df["poc_name"].fillna("").astype(str).str.strip()
-        df.loc[df["poc_name"] == "", "poc_name"] = df["cluster_id"]
-    else:
-        df["poc_name"] = df["cluster_id"]
+    if at not in ("school",):
+        if "poc_name" in df.columns:
+            df["poc_name"] = df["poc_name"].fillna("").astype(str).str.strip()
+            df.loc[df["poc_name"] == "", "poc_name"] = df["cluster_id"]
+        else:
+            df["poc_name"] = df["cluster_id"]
 
-    blank_email = df[df["poc_email"].isna() | (df["poc_email"].astype(str).str.strip() == "")]
+    # Ensure cc_emails column exists for non-school types
+    if "cc_emails" not in df.columns:
+        df["cc_emails"] = ""
+
+    blank_email = df[df["poc_email"].isna() | (df["poc_email"].astype(str).str.strip() == "") | (df["poc_email"].astype(str).str.strip().str.lower() == "nan")]
     if len(blank_email):
+        col_display = "school" if "school" in blank_email.columns else "volunteer_name" if "volunteer_name" in blank_email.columns else "student_name"
         print(f"WARNING: {len(blank_email)} row(s) have a blank POC email and will be skipped:")
-        print(blank_email[[ "school" if "school" in blank_email.columns else "volunteer_name" if "volunteer_name" in blank_email.columns else "student_name" ]].to_string(index=False))
+        print(blank_email[[col_display]].to_string(index=False))
         df = df.drop(blank_email.index)
 
     return df
@@ -227,6 +251,7 @@ def generate_docx_mode(df, cfg):
             "cluster_id": row["cluster_id"],
             "poc_name": row["poc_name"],
             "poc_email": row["poc_email"],
+            "cc_emails": row.get("cc_emails", ""),
             "position": row.get("position", ""),
             "docx_path": docx_out,
             "pdf_path": os.path.join(pdf_dir, fname_base + ".pdf"),
@@ -365,6 +390,7 @@ def generate_image_mode(df, cfg):
             "cluster_id": row["cluster_id"],
             "poc_name": row["poc_name"],
             "poc_email": row["poc_email"],
+            "cc_emails": row.get("cc_emails", ""),
             "position": row.get("position", ""),
             "pdf_path": pdf_out,
         })

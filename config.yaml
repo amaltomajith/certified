@@ -241,7 +241,11 @@ types:
     excel_sheet_name: 0
     columns:
       school: ''
-      poc_email: ''
+      poc1: ''
+      poc2: ''
+      poc3: ''
+      poc4: ''
+      poc5: ''
     image_text_fields:
       school:
         x: 1907
