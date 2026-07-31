@@ -272,9 +272,15 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     drive_card_html = ""
     if poc_folder_url and not is_direct:
         drive_card_html = f"""
-        <div style="margin: 20px 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <a href="{poc_folder_url}" target="_blank" style="display: inline-block; background-color: #004C6D; color: #ffffff; text-decoration: none; padding: 10px 22px; font-weight: 600; border-radius: 5px; font-size: 14px;">
-                Open Google Drive Folder &rarr;
+        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 22px 20px; margin: 24px 0; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+            <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+                Google Drive Certificate Repository
+            </div>
+            <div style="font-size: 13px; color: #475569; margin-bottom: 18px; line-height: 1.5;">
+                All certificate PDFs have been structured by event in your Google Drive directory.
+            </div>
+            <a href="{poc_folder_url}" target="_blank" style="display: inline-block; background-color: #004C6D; color: #ffffff; text-decoration: none; padding: 11px 26px; font-weight: 600; border-radius: 6px; font-size: 14px; letter-spacing: 0.2px;">
+                View All Certificates on Google Drive
             </a>
         </div>
         """
@@ -329,23 +335,10 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     except Exception:
         body_html_content = f"Dear <strong>{poc_name or poc_email}</strong>,<br><br>Please find your certificate attached."
 
-    # Dynamic Appreciation Banner selection based on active_type
-    if at == "school":
-        ty_filename = "Anvesha School Appreciation.jpg.jpeg"
-        banner_title = "ANVESHA '26 — Institutional Certificate of Appreciation"
-    elif at == "volunteer":
-        ty_filename = "Anvesha Volunteer Appreciation.jpg.jpeg"
-        banner_title = "ANVESHA '26 — Volunteer Certificate of Appreciation"
-    elif at == "winner":
-        ty_filename = "Anvesha Participant Appreciation.jpg.jpeg"
-        banner_title = "ANVESHA '26 — Winner Certificates of Recognition"
-    else:
-        ty_filename = "Anvesha Participant Appreciation.jpg.jpeg"
-        banner_title = "ANVESHA '26 — Participation Certificates"
-
-    ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlbodymail", ty_filename)
+    # Locate Thank You graphic if present
+    ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlbodymail", "Anvesha Participant Appreciation.jpg.jpeg")
     if not os.path.exists(ty_img_path):
-        ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", ty_filename)
+        ty_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", "Anvesha Participant Appreciation.jpg.jpeg")
     has_ty_img = os.path.exists(ty_img_path)
 
     thank_you_banner_html = (
@@ -408,8 +401,8 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
            <tbody> 
             <tr> 
              <td align="left" class="mainContent" style="background-color: #ffffff; padding: 30px 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); font-family: 'Georgia', serif; font-size: 15px; color: #333333; line-height: 1.6;" valign="top"> 
-              <div style="text-align: center; font-family: 'Georgia', serif; font-size: 20px; color: #004C6D; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-               {banner_title}
+              <div style="text-align: center; font-family: 'Georgia', serif; font-size: 22px; color: #004C6D; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+               ANVESHA 2026
               </div> 
               {html_body_paragraphs}
              </td> 
@@ -450,7 +443,7 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
         cc_list = [e.strip() for e in str(cc_emails).replace(",", ";").split(";") if e.strip() and e.strip().lower() not in ("", "nan", "none")]
         if cc_list:
             msg["Cc"] = ", ".join(cc_list)
-    
+
     msg.set_content(body_text)
     msg.add_alternative(html_email, subtype="html")
 
@@ -566,7 +559,7 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
 
 def main():
     cfg = load_config()
-    manifest_path = os.path.join(cfg.get("output_dir", "output"), "manifest.csv")
+    manifest_path = os.path.join(cfg["output_dir"], "manifest.csv")
 
     if not os.path.exists(manifest_path):
         print(f"No manifest found at {manifest_path}. Run generate_certificates.py first.")
