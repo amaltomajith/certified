@@ -272,15 +272,9 @@ def build_email(poc_name, poc_email, cluster_id, event_name, student_names, pdf_
     drive_card_html = ""
     if poc_folder_url and not is_direct:
         drive_card_html = f"""
-        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 22px 20px; margin: 24px 0; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-            <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
-                Google Drive Certificate Folder
-            </div>
-            <div style="font-size: 13px; color: #475569; margin-bottom: 18px; line-height: 1.5;">
-                All certificate PDFs are organized by event in your Google Drive folder.
-            </div>
-            <a href="{poc_folder_url}" target="_blank" style="display: inline-block; background-color: #004C6D; color: #ffffff; text-decoration: none; padding: 11px 26px; font-weight: 600; border-radius: 6px; font-size: 14px; letter-spacing: 0.2px;">
-                Access Certificates on Google Drive
+        <div style="margin: 20px 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <a href="{poc_folder_url}" target="_blank" style="display: inline-block; background-color: #004C6D; color: #ffffff; text-decoration: none; padding: 10px 22px; font-weight: 600; border-radius: 5px; font-size: 14px;">
+                Open Google Drive Folder &rarr;
             </a>
         </div>
         """
