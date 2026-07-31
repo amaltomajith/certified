@@ -1180,32 +1180,42 @@ async def send_endpoint(body: SendRequest):
                     srv.ehlo()
                     return srv
 
-            # Check if Gmail API is available (OAuth token has gmail.send scope)
+            # Gmail API check — if OAuth is connected at all, prefer it over SMTP.
+            # SMTP is blocked on Render (and most cloud hosts). Gmail API uses HTTPS/443.
+            # We always request gmail.send in DRIVE_SCOPES so any freshly-authorized token
+            # will have it. If the stored token pre-dates that scope, we surface a clear
+            # re-authorize prompt instead of silently falling into a timed-out SMTP.
             def _gmail_api_available() -> bool:
                 try:
-                    from drive_service import is_oauth_drive_available, OAUTH_TOKEN_FILE
-                    import json
-                    if not is_oauth_drive_available():
-                        return False
-                    data = json.loads(OAUTH_TOKEN_FILE.read_text(encoding="utf-8"))
-                    scopes = data.get("scopes", [])
-                    return any("gmail" in s for s in scopes)
+                    from drive_service import is_oauth_drive_available
+                    return is_oauth_drive_available()
                 except Exception:
                     return False
 
             _use_gmail_api = _gmail_api_available()
 
             def _send_one(msg_obj):
-                """Send one email. Tries Gmail REST API first (HTTPS, always works on cloud);
-                falls back to direct SMTP if Gmail API not authorized."""
+                """Send one email via Gmail REST API (HTTPS/443, works on Render).
+                Falls back to SMTP only when no OAuth token exists at all."""
                 if _use_gmail_api:
                     from drive_service import send_via_gmail_api
-                    send_via_gmail_api(msg_obj)
-                    return
+                    try:
+                        send_via_gmail_api(msg_obj)
+                        return
+                    except Exception as gmail_err:
+                        err_str = str(gmail_err)
+                        # Insufficient scope → token pre-dates gmail.send scope
+                        if "insufficient" in err_str.lower() or "403" in err_str or "scope" in err_str.lower():
+                            raise RuntimeError(
+                                "Gmail API: insufficient scope. "
+                                "Please re-authorize Google OAuth (Drive Auth panel) "
+                                "to grant the gmail.send permission, then retry."
+                            )
+                        raise  # re-raise other Gmail API errors as-is
 
-                # SMTP fallback
+                # SMTP fallback (only when OAuth not configured at all)
                 port = int(ecfg.get("smtp_port", 465))
-                host = ecfg["smtp_host"]
+                host = ecfg.get("smtp_host", "smtp.gmail.com")
                 srv = None
                 try:
                     srv = _create_smtp_connection(host, port)
@@ -1215,7 +1225,7 @@ async def send_endpoint(body: SendRequest):
                     srv = _create_smtp_connection(host, alt_port)
 
                 try:
-                    srv.login(ecfg["sender_email"], password)
+                    srv.login(ecfg.get("sender_email", ""), password)
                     srv.send_message(msg_obj)
                 finally:
                     try:
