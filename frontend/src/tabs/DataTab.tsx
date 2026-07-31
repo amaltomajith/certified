@@ -30,35 +30,49 @@ type CertType = typeof CERT_TYPES[number]['id'];
 
 const getKeysForType = (type: CertType) => {
   if (type === 'volunteer') return ['volunteer_name', 'volunteer_email'];
-  if (type === 'school') return ['school', 'poc_email', 'poc_name'];
+  if (type === 'school') return ['school', 'poc1', 'poc2', 'poc3', 'poc4', 'poc5'];
   if (type === 'winner') return ['student_name', 'event_name', 'school', 'poc_email', 'poc_name', 'position'];
   return ['student_name', 'event_name', 'school', 'poc_email', 'poc_name'];
 }
 
 // Fields the user maps from Excel columns to our internal names
-const INTERNAL_KEYS = ['student_name', 'school', 'event_name', 'poc_email', 'poc_name', 'position', 'volunteer_name', 'volunteer_email'] as const
+const INTERNAL_KEYS = [
+  'student_name', 'school', 'event_name', 'poc_email', 'poc_name', 'position',
+  'volunteer_name', 'volunteer_email',
+  'poc1', 'poc2', 'poc3', 'poc4', 'poc5'
+] as const
 type InternalKey = typeof INTERNAL_KEYS[number]
 
 const KEY_LABELS: Record<InternalKey, string> = {
   student_name: 'Student Name ★',
-  school: 'School / College',
+  school: 'School / College Name ★',
   event_name: 'Event Name',
   poc_email: 'POC Email ★',
   poc_name: 'POC Name',
   position: 'Podium Position (1, 2, 3) ★',
   volunteer_name: 'Volunteer Name ★',
   volunteer_email: 'Volunteer Email ★',
+  poc1: 'Primary POC Email (POC1) ★',
+  poc2: 'Secondary POC 2 Email (CC)',
+  poc3: 'Secondary POC 3 Email (CC)',
+  poc4: 'Secondary POC 4 Email (CC)',
+  poc5: 'Secondary POC 5 Email (CC)',
 }
 
 const KEY_HINTS: Record<InternalKey, string> = {
   student_name: 'Required — printed on certificate',
-  school: 'Optional — printed on certificate',
+  school: 'Required for School certs — printed on certificate & used in email greeting (Dear School Name)',
   event_name: 'Optional — printed on certificate',
   poc_email: 'Required — used to group students into clusters',
   poc_name: 'Optional — used for email greeting name',
   position: 'Required for Winners — values must be 1, 2, or 3',
   volunteer_name: 'Required — printed on volunteer certificate',
   volunteer_email: 'Required — recipient email address',
+  poc1: 'Required — primary email recipient (To)',
+  poc2: 'Optional — secondary recipient (CC)',
+  poc3: 'Optional — secondary recipient (CC)',
+  poc4: 'Optional — secondary recipient (CC)',
+  poc5: 'Optional — secondary recipient (CC)',
 }
 
 // ── Font Library ──────────────────────────────────────────────────────────────
@@ -310,22 +324,65 @@ export default function DataTab() {
     window.location.reload()
   }
 
-  const handleExcelFile = useCallback(async (file: File) => {
+  const autoMatchColumns = (excelColumns: string[], type: CertType): ColumnMapping => {
+    const mapping: ColumnMapping = {}
+    const keys = getKeysForType(type)
 
+    for (const key of keys) {
+      const kLower = key.toLowerCase()
+      let match = excelColumns.find(col => col.trim().toLowerCase() === kLower)
+
+      if (!match) {
+        if (key === 'school') {
+          match = excelColumns.find(col => /school|college|institution/i.test(col))
+        } else if (key === 'poc1') {
+          match = excelColumns.find(col => /^poc1$|^poc 1$|poc_email|poc email|email/i.test(col))
+        } else if (key === 'poc2') {
+          match = excelColumns.find(col => /^poc2$|^poc 2$/i.test(col))
+        } else if (key === 'poc3') {
+          match = excelColumns.find(col => /^poc3$|^poc 3$/i.test(col))
+        } else if (key === 'poc4') {
+          match = excelColumns.find(col => /^poc4$|^poc 4$/i.test(col))
+        } else if (key === 'poc5') {
+          match = excelColumns.find(col => /^poc5$|^poc 5$/i.test(col))
+        } else if (key === 'poc_email' || key === 'volunteer_email') {
+          match = excelColumns.find(col => /poc_email|poc email|email/i.test(col))
+        } else if (key === 'student_name' || key === 'volunteer_name') {
+          match = excelColumns.find(col => /student|candidate|participant|volunteer|name/i.test(col))
+        } else if (key === 'event_name') {
+          match = excelColumns.find(col => /event|competition|activity/i.test(col))
+        } else if (key === 'poc_name') {
+          match = excelColumns.find(col => /poc name|poc_name|coordinator/i.test(col))
+        } else if (key === 'position') {
+          match = excelColumns.find(col => /position|rank|prize|place|podium/i.test(col))
+        }
+      }
+
+      if (match) {
+        mapping[key] = match
+      }
+    }
+
+    return mapping
+  }
+
+  const handleExcelFile = useCallback(async (file: File) => {
     setExcelLoading(true); setExcelError('')
     try {
       const result = await uploadExcel(file)
-      // Set the excel result directly from the upload response — columns come from the file itself
       setExcelResult(result)
-      // Reset column mapping so user maps fresh for the new file
-      setColMap({ student_name: '', school: '', event_name: '', poc_email: '' })
-      setColGroups([])
+      const autoMap = autoMatchColumns(result.excel_columns, activeCertType)
+      setColMap(autoMap)
+      if (Object.keys(autoMap).length > 0) {
+        await saveColumns(autoMap)
+      }
+      setColGroups(result.groups || [])
     } catch (e: any) {
       setExcelError(e.message)
     } finally {
       setExcelLoading(false)
     }
-  }, [])
+  }, [activeCertType])
 
   const handleClearExcel = useCallback(async () => {
     try {
