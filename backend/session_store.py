@@ -73,7 +73,15 @@ def _save_to_disk(sender_email: str, app_password: str) -> None:
 
 
 def load_from_disk() -> bool:
-    """Try to restore credentials from disk. Returns True if successful."""
+    """Try to restore credentials from environment variables or disk. Returns True if successful."""
+    # Check Environment Variables first (survives cloud restarts like Render)
+    env_email = os.environ.get("SENDER_EMAIL") or os.environ.get("GMAIL_EMAIL")
+    env_pass = os.environ.get("SENDER_APP_PASSWORD") or os.environ.get("GMAIL_APP_PASSWORD")
+    if env_email and env_pass:
+        _store["sender_email"] = env_email
+        _store["app_password"] = env_pass.replace(" ", "")
+        return True
+
     if not _CREDS_FILE.exists():
         return False
     try:

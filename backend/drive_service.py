@@ -26,13 +26,32 @@ _oauth_flow_state: dict = {"status": "idle", "error": None}  # status: idle|in_p
 
 # ─── OAuth2 helpers ────────────────────────────────────────────────────────────
 
+def _restore_env_oauth_files() -> None:
+    """Restore OAuth files from environment variables if set (survives Render restarts)."""
+    env_secrets = os.environ.get("GOOGLE_CLIENT_SECRETS_JSON")
+    if env_secrets and not OAUTH_CLIENT_SECRETS_FILE.exists():
+        try:
+            OAUTH_CLIENT_SECRETS_FILE.write_text(env_secrets, encoding="utf-8")
+        except Exception:
+            pass
+
+    env_token = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON") or os.environ.get("DRIVE_TOKEN_JSON")
+    if env_token and not OAUTH_TOKEN_FILE.exists():
+        try:
+            OAUTH_TOKEN_FILE.write_text(env_token, encoding="utf-8")
+        except Exception:
+            pass
+
+
 def is_oauth_client_available() -> bool:
     """Return True if the user has uploaded their OAuth2 client_secrets.json."""
+    _restore_env_oauth_files()
     return OAUTH_CLIENT_SECRETS_FILE.exists()
 
 
 def is_oauth_token_available() -> bool:
     """Return True if a persisted OAuth2 token exists."""
+    _restore_env_oauth_files()
     return OAUTH_TOKEN_FILE.exists()
 
 
